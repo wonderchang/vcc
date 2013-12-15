@@ -17,10 +17,6 @@ int main(void) {
   fPtr = fopen("test.c", "r");
 
   getNextChar();
-  getNextChar();
-  getNextChar();
-  getNextChar();
-  getNextChar();
 
   fclose(fPtr);
   return 0;
