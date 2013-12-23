@@ -80,6 +80,31 @@ TokenType get_token() {
     c = get_next_char();
     switch(state) {
       case START:
+	if(c == ' ' || c == '\t' || c == '\n') state = START;
+	else if(c == '\"') state = INSTRING;
+	else if(c == '\'') state = BEG_CHAR;
+	else if(is_digit(c)) state = INNUM;
+	else if(is_alpha(c)) state = INID;
+	else if(c == '+' || c == '-') state = INSIGN;
+	else if(c == '=') state = IN_EQ;
+	else if(c == '!') state = IN_NE;
+	else if(c == '<') state = IN_LE;
+	else if(c == '>') state = IN_GE;
+	else if(c == '/') state = INCOMMENT;
+	else {
+	  switch(c) {
+	    state = DONE;
+	    case '*': current_token = STAR; break;
+	    case '(': current_token = LEFT_PARENTH; break;
+	    case ')': current_token = RIGHT_PARENTH; break;
+	    case ',': current_token = COMMA; break;
+	    case ';': current_token = SEMICOLON; break;
+	    case '{': current_token = LEFT_BRACKET; break;
+	    case '}': current_token = RIGHT_BRACKET; break;
+	    case EOF: break;
+	    default: break;
+	  }
+	}
 	break;
       case INID:
 	break;
@@ -88,6 +113,8 @@ TokenType get_token() {
       case INNUM:
 	break;
       case INSTRING:
+	break;
+      case INCOMMENT:
 	break;
       case BEG_CHAR:
 	break;
