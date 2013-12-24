@@ -3,12 +3,13 @@
 #include <string.h>
 
 #define MAX_BUFLEN 256
-#define MAX_TOKENLEN 256;
-#define MAX_RW_NUM 14;
+#define MAX_TOKENLEN 256
+#define MAX_RW_NUM 14
 
 FILE *source;
-int lineno;
-int linepos;
+int line_no;
+int line_pos;
+int token_no;
 
 char line_buffer[MAX_BUFLEN];
 int line_position = 0;
@@ -50,196 +51,226 @@ struct {
   {"main", MAIN}, {"FALSE", FALSE}, {"TRUE", TRUE}
 };
 
-struct {
-  char* token_string;
-  int token_lineno;
-  int token_linepos;
-  TokenType token_type;
+typedef struct {
+  int id;
+  char* string;
+  int line_no;
+  int line_pos;
+  TokenType type;
 } Token;
 
+typedef struct {
+  int c;
+  int line_no;
+  int line_pos;
+} Character;
 
-int get_next_char();
+
+Character get_next_char();
 void back_next_char();
-TokenType get_token();
+Token get_token();
+void print_token(Token token);
 void print_token_type(TokenType token_type);
 
 int main(int argc, char* argv[]) {
 
-  lineno = -1;
+  Token token;
+
+  line_no = -1;
+  token_no = -1;
   source = fopen(argv[1], "r");
 
-  get_token();
-  get_token();
-  get_token();
-  get_token();
-  get_token();
-  get_token();
+  token = get_token();
+  print_token(token);
+  token = get_token();
+  print_token(token);
+  /*
+  while(token.type != ENDFILE || token.type != ERROR) {
+    token = get_token();
+    print_token(token);
+  }
+  */
 
   fclose(source);
   return 0;
 }
 
-int get_next_char() {
-  linepos++;
-  int current_char;
-  if(line_buffer[linepos]) {
+Character get_next_char() {
+  line_pos++;
+  Character character;
+  if(line_buffer[line_pos]) {
     //line_buffer haven't end, get the next char
-    current_char = line_buffer[linepos];
-    printf("linepos = %d, current_char = '%c'\n", linepos, current_char);
-    return current_char;
+    character.c = line_buffer[line_pos];
+    character.line_no = line_no;
+    character.line_pos = line_pos;
+    return character;
   }
   else {
     //line_buffer ended, fget next line, and get the first char
     if(fgets(line_buffer, MAX_BUFLEN - 1, source) != NULL) {
-      lineno++;
-      linepos = 0;
-      current_char = line_buffer[linepos];
-      printf("Get the new line:\n");
-      printf("\t%d\t%s\n", lineno, line_buffer);
-      printf("linepos = %d, current_char = '%c'\n", linepos, current_char);
-      return current_char;
+      line_no++;
+      line_pos = 0;
+      character.c = line_buffer[line_pos];
+      character.line_no = line_no;
+      character.line_pos = line_pos;
+      return character;
     }
     else {
       EOF_flag = 1;
-      return EOF;
+      character.c = EOF;
+      character.line_no = line_no;
+      character.line_pos = line_pos;
+      return character;
     }
   }
 }
 
 void back_next_char() {
-  if(!EOF_flag) linepos--;
+  if(!EOF_flag) line_pos--;
 }
 
 /* lookup an identifier to see if it is a reserved word */
 /* uses linear search */
 static TokenType reserved_lookup (char * s) { 
   int i;
-  for (i = 0; i < MAX_SW_NUM; i++)
+  for (i = 0; i < MAX_RW_NUM; i++)
     if (!strcmp(s ,reserved_words[i].word))
       return reserved_words[i].token_type;
   return ID;
 }
 
-TokenType get_token() {
+Token get_token() {
 
-  int token_string_index = 0; 
-  TokenType token_type;
+  Token token;
+  Character character;
   StateType state = START;
+  int token_string_index = 0; 
   int save;
-  int c;
+  int first_loop = 1;
 
   while(state != DONE) {
-    c = get_next_char();
+    character = get_next_char();
+    if(first_loop) {
+      token.line_no = character.line_no;
+      token.line_pos = character.line_pos;
+      first_loop = 0;
+    }
     save = 1;
     switch(state) {
       case START:
-	if(c == ' ' || c == '\t' || c == '\n') state = START;
-	else if(isalpha(c)) state = INID;
-	else if(isdigit(c)) state = INNUM;
-	else if(c == '\"') state = INSTRING;
-	else if(c == '\'') state = BEG_CHAR;
-	else if(c == '=') state = IN_EQ;
-	else if(c == '!') state = IN_NEQ;
-	else if(c == '<') state = IN_LT;
-	else if(c == '>') state = IN_GT;
-	else if(c == '/') state = SLASH;
+	if(character.c == ' ' || character.c == '\t' || character.c == '\n') state = START;
+	else if(isalpha(character.c)) state = INID;
+	else if(isdigit(character.c)) state = INNUM;
+	else if(character.c == '\"') state = INSTRING;
+	else if(character.c == '\'') state = BEG_CHAR;
+	else if(character.c == '=') state = IN_EQ;
+	else if(character.c == '!') state = IN_NEQ;
+	else if(character.c == '<') state = IN_LT;
+	else if(character.c == '>') state = IN_GT;
+	else if(character.c == '/') state = SLASH;
 	else {
 	  state = DONE;
-	  switch(c) {
-	    case '+': token_type = PLUS; break;
-	    case '-': token_type = MINUS; break;
-	    case '*': token_type = TIMES; break;
-	    case '%': token_type = MODE; break;
-	    case '(': token_type = LP; break;
-	    case ')': token_type = RP; break;
-	    case ',': token_type = COMMA; break;
-	    case ';': token_type = SEMICO; break;
-	    case '{': token_type = LB; break;
-	    case '}': token_type = RB; break;
-	    case EOF: token_type = ENDFILE; break;
-	    default: token_type = ERROR; break;
+	  switch(character.c) {
+	    case '+': token.type = PLUS; break;
+	    case '-': token.type = MINUS; break;
+	    case '*': token.type = TIMES; break;
+	    case '%': token.type = MODE; break;
+	    case '(': token.type = LP; break;
+	    case ')': token.type = RP; break;
+	    case ',': token.type = COMMA; break;
+	    case ';': token.type = SEMICO; break;
+	    case '{': token.type = LB; break;
+	    case '}': token.type = RB; break;
+	    case EOF: token.type = ENDFILE; break;
+	    default: token.type = ERROR; break;
 	  }
 	}
 	break;
       case INID:
-	if(isdigit(c)) state = INID;
-	else if(isalpha(c)) state = INID;
-	else { state = DONE; token_type = ID; back_next_char(); }
+	if(isdigit(character.c)) state = INID;
+	else if(isalpha(character.c)) state = INID;
+	else { state = DONE; token.type = ID; back_next_char(); }
 	break;
       case INNUM:
-	if(isdigit(c)) state = INNUM;
-	else if(!isalpha(c)) { state = DONE; token_type = NUMBER; back_next_char(); }
-	else { state = DONE; token_type = ERROR; }
+	if(isdigit(character.c)) state = INNUM;
+	else if(!isalpha(character.c)) { state = DONE; token.type = NUMBER; back_next_char(); }
+	else { state = DONE; token.type = ERROR; save = 0; }
 	break;
       case INSTRING:
-	if(isalpha(c)) state = INSTRING;
-	else { state = DONE; token_type = STR_CONST; back_next_char(); }
+	if(isalpha(character.c)) state = INSTRING;
+	else { state = DONE; token.type = STR_CONST; back_next_char(); }
 	break;
       case BEG_CHAR:
 	state = END_CHAR;
 	break;
       case END_CHAR:
-	if(c == '\'') { state = DONE; token_type = CHAR_CONST; back_next_char(); }
-	else { state = DONE; token_type = ERROR; }
+	if(character.c == '\'') { state = DONE; token.type = CHAR_CONST; back_next_char(); }
+	else { state = DONE; token.type = ERROR; save = 0; }
 	break;
       case IN_EQ:
-	if(c == '=') { state = DONE; token_type = EQ; back_next_char(); }
-	else { state = DONE; token_type = ASSIGN; back_next_char(); }
+	if(character.c == '=') { state = DONE; token.type = EQ; back_next_char(); }
+	else { state = DONE; token.type = ASSIGN; back_next_char(); }
 	break;
       case IN_NEQ:
-	if(c == '=') { state = DONE; token_type = NEQ; back_next_char(); }
-	else { state = DONE; token_type = ERROR; }
+	if(character.c == '=') { state = DONE; token.type = NEQ; back_next_char(); }
+	else { state = DONE; token.type = ERROR; save = 0; }
 	break;
       case IN_LT:
-	if(c == '=') { state = DONE; token_type = LTEQ; back_next_char(); }
-	else { state = DONE; token_type = LT; }
+	if(character.c == '=') { state = DONE; token.type = LTEQ; back_next_char(); }
+	else { state = DONE; token.type = LT; }
 	break;
       case IN_GT:
-	if(c == '=') { state = DONE; token_type = GTEQ; back_next_char(); }
-	else { state = DONE; token_type = GT; }
+	if(character.c == '=') { state = DONE; token.type = GTEQ; back_next_char(); }
+	else { state = DONE; token.type = GT; }
 	break;
       case SLASH:
-	if(c == '/') state = SINGLE_COMMENT;
-	else if(c == '*') state = MULTI_COMMENT;
-	else { state = DONE; token_type = DIVIDE; back_next_char(); }
+	if(character.c == '/') state = SINGLE_COMMENT;
+	else if(character.c == '*') state = MULTI_COMMENT;
+	else { state = DONE; token.type = DIVIDE; back_next_char(); }
 	break;
       case SINGLE_COMMENT:
-	if(c == '\n') { state = DONE; token_type = COMMENT; back_next_char(); }
+	if(character.c == '\n') { state = DONE; token.type = COMMENT; back_next_char(); }
 	else state = SINGLE_COMMENT;
 	break;
       case MULTI_COMMENT:
-	if(c == '*') state = END_MULTI_COMMENT;
+	if(character.c == '*') state = END_MULTI_COMMENT;
 	else state = MULTI_COMMENT;
 	break;
       case END_MULTI_COMMENT:
-	if(c == '/') { state = DONE; token_type = COMMENT; back_next_char(); }
+	if(character.c == '/') { state = DONE; token.type = COMMENT; back_next_char(); }
 	else state = MULTI_COMMENT;
 	break;
       case DONE:
 	break;
       default:
 	state = DONE;
-	token_type = ERROR;
+	token.type = ERROR;
+	save = 0;
 	printf("The Unexpected Stage, Fucking Bug!\n");
 	break;
     }
-    if((save) && (token_string_index <= MAX_TOKENLEN))
-      token_string[token_string_index++] = (char) c;
-    if (state == DONE) { 
+    if((save) && (token_string_index <= MAX_TOKENLEN)) {
+      token_string[token_string_index++] = (char) character.c;
+    }
+    if(state == DONE) { 
       token_string[token_string_index] = '\0';
-      if (token_type == ID)
-	token_type = reserved_lookup(token_string);
+      if(token.type == ID)
+	token.type = reserved_lookup(token_string);
     }
   }
-  print_token_type(token_type);
-  return token_type;
+  token.id = token_no + 1;
+  token.string = token_string;
+  return token;
 }
+
+void print_token(Token token) {
+  printf("filename.c:%d:%d, token ID: %d, token: \"%s\", ", token.line_no, token.line_pos, token.id, token.string);
+  print_token_type(token.type);
+}
+
 
 void print_token_type(TokenType token_type) {
   switch(token_type) {
-    case RW:
-      printf("token type: RW\n");
-      break;
     case ID:
       printf("token type: ID\n");
       break;
@@ -317,6 +348,48 @@ void print_token_type(TokenType token_type) {
       break;
     case DQ:
       printf("token type: DQ\n");
+      break;
+    case BOOL:
+      printf("token type: BOOL\n");
+      break;
+    case CHAR:
+      printf("token type: CHAR\n");
+      break;
+    case CONST:
+      printf("token type: CONST\n");
+      break;
+    case STRING:
+      printf("token type: STRING\n");
+      break;
+    case INT:
+      printf("token type: INT\n");
+      break;
+    case IF:
+      printf("token type: IF\n");
+      break;
+    case ELSE:
+      printf("token type: ELSE\n");
+      break;
+    case WHILE:
+      printf("token type: WHILE\n");
+      break;
+    case READ:
+      printf("token type: READ\n");
+      break;
+    case PRINT:
+      printf("token type: PRINT\n");
+      break;
+    case PRINTLN:
+      printf("token type: PRINTLN\n");
+      break;
+    case MAIN:
+      printf("token type: MAIN\n");
+      break;
+    case FALSE:
+      printf("token type: FALSE\n");
+      break;
+    case TRUE:
+      printf("token type: TRUE\n");
       break;
     case ENDFILE:
       printf("token type: ENDFILE\n");
