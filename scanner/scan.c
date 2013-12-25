@@ -3,7 +3,7 @@
 #include <string.h>
 
 #define MAX_BUFLEN 256
-#define MAX_TOKENLEN 256
+#define MAX_TOKENLEN 4096
 #define MAX_RW_NUM 14
 
 FILE *source;
@@ -54,7 +54,7 @@ struct {
   char* word;
   TokenType token_type;
 } reserved_words[MAX_RW_NUM] = {
-  {"bool", BOOL}, {"char", CHAR}, {"CONST", CONST}, {"string", STRING}, {"int", INT},
+  {"bool", BOOL}, {"char", CHAR}, {"const", CONST}, {"string", STRING}, {"int", INT},
   {"if", IF}, {"else", ELSE}, {"while", WHILE}, 
   {"read", READ}, {"print", PRINT}, {"println", PRINTLN}, 
   {"main", MAIN}, {"FALSE", FALSE}, {"TRUE", TRUE}
@@ -94,12 +94,6 @@ int main(int argc, char* argv[]) {
     print_token(token);
     token = get_token();
   }
-  /*
-  while(token.type != ENDFILE || token.type != ERROR) {
-    token = get_token();
-    print_token(token);
-  }
-  */
 
   fclose(source);
   return 0;
@@ -187,7 +181,7 @@ Token get_token() {
 	else if(character.c == '{') { state = READY_DONE; token.type = LB; }
 	else if(character.c == '}') { state = READY_DONE; token.type = RB; }
 	else if(character.c == EOF) { state = DONE; token.type = END_FILE; }
-	else { state = DONE; token.type = ERROR; save = 0; }
+	else { state = DONE; token.type = ERROR; back_next_char(); }
 	break;
       case INID:
 	if(isdigit(character.c)) state = INID;
@@ -197,18 +191,18 @@ Token get_token() {
       case INNUM:
 	if(isdigit(character.c)) state = INNUM;
 	else if(!isalpha(character.c)) { state = DONE; token.type = NUMBER; back_next_char(); }
-	else { state = DONE; token.type = ERROR; save = 0; }
+	else { state = DONE; token.type = ERROR; back_next_char(); }
 	break;
       case INSTRING:
-	if(character.c == '\"') { state = DONE; token.type = STR_CONST; back_next_char(); }
+	if(character.c == '\"') { state = READY_DONE; token.type = STR_CONST; }
 	else state = INSTRING;
 	break;
       case BEG_CHAR:
 	state = END_CHAR;
 	break;
       case END_CHAR:
-	if(character.c == '\'') { state = DONE; token.type = CHAR_CONST; back_next_char(); }
-	else { state = DONE; token.type = ERROR; save = 0; }
+	if(character.c == '\'') { state = READY_DONE; token.type = CHAR_CONST; }
+	else { state = DONE; token.type = ERROR; back_next_char(); }
 	break;
       case IN_EQ:
 	if(character.c == '=') { state = DONE; token.type = EQ; back_next_char(); }
@@ -216,7 +210,7 @@ Token get_token() {
 	break;
       case IN_NEQ:
 	if(character.c == '=') { state = DONE; token.type = NEQ; back_next_char(); }
-	else { state = DONE; token.type = ERROR; save = 0; }
+	else { state = DONE; token.type = ERROR; back_next_char(); }
 	break;
       case IN_LT:
 	if(character.c == '=') { state = DONE; token.type = LTEQ; back_next_char(); }
@@ -249,13 +243,13 @@ Token get_token() {
       case DONE:
 	break;
       default:
-	state = DONE;
-	token.type = ERROR;
-	save = 0;
-	printf("The Unexpected Stage, Fucking Bug!\n");
+	state = DONE; token.type = ERROR; back_next_char();
+	printf("The Unexpected State, Fucking Bug!\n");
 	break;
     }
     if(state == DONE) { 
+      if(token.type == ERROR)
+	token_string[token_string_index++] = (char) character.c;
       token_string[token_string_index] = '\0';
       if(token.type == ID)
 	token.type = reserved_lookup(token_string);
@@ -276,144 +270,145 @@ Token get_token() {
 }
 
 void print_token(Token token) {
-  printf("filename.c:%d:%d, token ID: %d, token: \"%s\", ", token.line_no, token.line_pos, token.id, token.string);
+  printf("filename.c:%d:%d, token ID: %d, ", token.line_no, token.line_pos, token.id);
   print_token_type(token.type);
+  printf("\t\ttoken: [%s]\n", token.string);
 }
 
 
 void print_token_type(TokenType token_type) {
   switch(token_type) {
     case SPACE:
-      printf("token type: SPACE\n");
+      printf("token type: SPACE, ");
       break;
     case ID:
-      printf("token type: ID\n");
+      printf("token type: ID, ");
       break;
     case NUMBER:
-      printf("token type: NUMBER\n");
+      printf("token type: NUMBER, ");
       break;
     case CHAR_CONST:
-      printf("token type: CHAR_CONST\n");
+      printf("token type: CHAR_CONST, ");
       break;
     case STR_CONST:
-      printf("token type: STR_CONST\n");
+      printf("token type: STR_CONST, ");
       break;
     case BOOL_VAL:
-      printf("token type: BOOL_VAL\n");
+      printf("token type: BOOL_VAL, ");
       break;
     case COMMENT:
-      printf("token type: COMMENT\n");
+      printf("token type: COMMENT, ");
       break;
     case PLUS:
-      printf("token type: PLUS\n");
+      printf("token type: PLUS, ");
       break;
     case MINUS:
-      printf("token type: MINU\n");
+      printf("token type: MINU, ");
       break;
     case ASSIGN:
-      printf("token type: ASSIGN\n");
+      printf("token type: ASSIGN, ");
       break;
     case TIMES:
-      printf("token type: TIMES\n");
+      printf("token type: TIMES, ");
       break;
     case DIVIDE:
-      printf("token type: DIVIDE\n");
+      printf("token type: DIVIDE, ");
       break;
     case MODE:
-      printf("token type: MODE\n");
+      printf("token type: MODE, ");
       break;
     case LT:
-      printf("token type: LT\n");
+      printf("token type: LT, ");
       break;
     case LTEQ:
-      printf("token type: LTEQ\n");
+      printf("token type: LTEQ, ");
       break;
     case GT:
-      printf("token type: GT\n");
+      printf("token type: GT, ");
       break;
     case GTEQ:
-      printf("token type: GTEQ\n");
+      printf("token type: GTEQ, ");
       break;
     case EQ:
-      printf("token type: EQ\n");
+      printf("token type: EQ, ");
       break;
     case NEQ:
-      printf("token type: NEQ\n");
+      printf("token type: NEQ, ");
       break;
     case LP:
-      printf("token type: LP\n");
+      printf("token type: LP, ");
       break;
     case RP:
-      printf("token type: RP\n");
+      printf("token type: RP, ");
       break;
     case LB:
-      printf("token type: LB\n");
+      printf("token type: LB, ");
       break;
     case RB:
-      printf("token type: RB\n");
+      printf("token type: RB, ");
       break;
     case COMMA:
-      printf("token type: COMMA\n");
+      printf("token type: COMMA, ");
       break;
     case SEMICO:
-      printf("token type: SEMICO\n");
+      printf("token type: SEMICO, ");
       break;
     case SQ:
-      printf("token type: SQ\n");
+      printf("token type: SQ, ");
       break;
     case DQ:
-      printf("token type: DQ\n");
+      printf("token type: DQ, ");
       break;
     case BOOL:
-      printf("token type: BOOL\n");
+      printf("token type: BOOL, ");
       break;
     case CHAR:
-      printf("token type: CHAR\n");
+      printf("token type: CHAR, ");
       break;
     case CONST:
-      printf("token type: CONST\n");
+      printf("token type: CONST, ");
       break;
     case STRING:
-      printf("token type: STRING\n");
+      printf("token type: STRING, ");
       break;
     case INT:
-      printf("token type: INT\n");
+      printf("token type: INT, ");
       break;
     case IF:
-      printf("token type: IF\n");
+      printf("token type: IF, ");
       break;
     case ELSE:
-      printf("token type: ELSE\n");
+      printf("token type: ELSE, ");
       break;
     case WHILE:
-      printf("token type: WHILE\n");
+      printf("token type: WHILE, ");
       break;
     case READ:
-      printf("token type: READ\n");
+      printf("token type: READ, ");
       break;
     case PRINT:
-      printf("token type: PRINT\n");
+      printf("token type: PRINT, ");
       break;
     case PRINTLN:
-      printf("token type: PRINTLN\n");
+      printf("token type: PRINTLN, ");
       break;
     case MAIN:
-      printf("token type: MAIN\n");
+      printf("token type: MAIN, ");
       break;
     case FALSE:
-      printf("token type: FALSE\n");
+      printf("token type: FALSE, ");
       break;
     case TRUE:
-      printf("token type: TRUE\n");
+      printf("token type: TRUE, ");
       break;
     case END_FILE:
-      printf("token type: ENDFILE\n");
+      printf("token type: ENDFILE, ");
       break;
     case ERROR:
-      printf("token type: ERROR\n");
+      printf("token type: ERROR, ");
       break;
     default:
-      printf("Unexpected token type occur, fucking bug!\n");
+      printf("Unexpected token type occur, fucking bug!, ");
       break;
   }
 }

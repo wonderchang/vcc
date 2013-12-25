@@ -1,0 +1,47 @@
+/*
+/**************************************************
+ *                                                *
+ *   Program: vc-A1-TT03.vc                       *
+ *                                                *
+ *   Vanilla-C compiler test program TT03         *
+ *   Purpose: Testing Vanilla-C compiler of A1    *
+ *   Test Items:                                  *
+ *     (1) Lexical Analysis                       *
+ *     (2) Full Program                           *
+ *   Date: 2012/06/08                             *
+ *                                                *
+ **************************************************
+*/
+main()
+{
+  // ----------------------------------------------
+  //   SYMBOLIC CONSTANTS AND VARIABLES
+  // ----------------------------------------------
+    const  a1 = "°õ¦æµ²ªG: Fibonacci(", MAX = 25;
+    int	M, N, K0, K1, K2;
+  // ----------------------------------------------
+  //   PROCESSING STATEMENTS
+  // ----------------------------------------------
+    print( "Please enter N: "); read(N);
+    M  = N;
+    K0 = 0;
+    K1 = 1;
+    println("// ****");
+    if (N <= MAX) { 
+      if (N < 2) K2 = N;
+        else
+          while(M > 0) {
+            M = M-1;
+            K2= K0+K1; K0 = K1, K1 = K2;
+        }
+      print( a1 );
+      print( ")" );
+      println(K2);
+    } else {
+      print("!! ");
+      print(N);
+      println("is not a valid value!"); 
+    }
+    println("// ****");
+  // --- END OF PROGRAM ---------------------------  
+}
