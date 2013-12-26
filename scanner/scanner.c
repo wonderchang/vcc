@@ -2,38 +2,31 @@
 #include <ctype.h>
 #include <string.h>
 
+//The max length of the buffer that the longest line it can read
 #define MAX_BUFLEN 256
+//The max length of the token string
 #define MAX_TOKENLEN 4096
+//The Number of the reserved words
 #define MAX_RW_NUM 14
 
+
+//The source filename (Global)
 FILE *source;
+//The number of line which is processing
 int line_no;
+//The position of the line
 int line_pos;
+//The number of token
 int token_no;
 
+//The buffer which store the reading line
 char line_buffer[MAX_BUFLEN];
-int line_position = 0;
-int current_line_buffer_string_size = 0;
+//The variable that save an character each time for get next char, to obtain the string of token
+char token_string[MAX_TOKENLEN + 1];
+//The flag that record it is end of file or not
 int EOF_flag = 0;
 
-char token_string[MAX_TOKENLEN + 1];
-
-typedef enum { 
-  //Start and end
-  START, DONE, READY_DONE,
-  //White space
-  BLANK,
-  //Identifier and number
-  INID, INNUM,
-  //Characters
-  INSTRING, BEG_CHAR, END_CHAR,
-  //Conditions
-  IN_EQ, IN_NEQ, IN_LT, IN_GT,
-  //Comments
-  IN_SLASH, SINGLE_COMMENT, MULTI_COMMENT, END_MULTI_COMMENT
-
-} StateType;
-
+//The type of token
 typedef enum {
   //Reserved word
   BOOL, CHAR, CONST, STRING, INT, IF, ELSE, WHILE,
@@ -50,7 +43,34 @@ typedef enum {
   SPACE
 } TokenType;
 
-struct { 
+//The token structure that contains some info
+typedef struct {
+  int id;
+  char* string;
+  int line_no;
+  int line_pos;
+  TokenType type;
+} Token;
+
+
+//The type of state
+typedef enum { 
+  //Start and end
+  START, DONE, READY_DONE,
+  //White space
+  BLANK,
+  //Identifier and number
+  INID, INNUM,
+  //Characters
+  INSTRING, BEG_CHAR, END_CHAR,
+  //Conditions
+  IN_EQ, IN_NEQ, IN_LT, IN_GT,
+  //Comments
+  IN_SLASH, SINGLE_COMMENT, MULTI_COMMENT, END_MULTI_COMMENT
+} StateType;
+
+//The reserved word list, used to get the reserved word token
+static struct { 
   char* word;
   TokenType token_type;
 } reserved_words[MAX_RW_NUM] = {
@@ -60,27 +80,21 @@ struct {
   {"main", MAIN}, {"FALSE", FALSE}, {"TRUE", TRUE}
 };
 
-typedef struct {
-  int id;
-  char* string;
-  int line_no;
-  int line_pos;
-  TokenType type;
-} Token;
-
+//Each time get next char, the related info store in it and return
 typedef struct {
   int c;
   int line_no;
   int line_pos;
 } Character;
 
-
+//Function prototype
 Character get_next_char();
 void back_next_char();
 Token get_token();
 void print_token(Token token);
 void print_token_type(TokenType token_type);
 
+/*
 int main(int argc, char* argv[]) {
 
   Token token;
@@ -89,8 +103,7 @@ int main(int argc, char* argv[]) {
   token_no = 0;
   source = fopen(argv[1], "r");
 
-  token = get_token();
-  while(token.type != END_FILE) {
+  while(token.type != END_FILE && token.type != ERROR) {
     print_token(token);
     token = get_token();
   }
@@ -98,6 +111,7 @@ int main(int argc, char* argv[]) {
   fclose(source);
   return 0;
 }
+*/
 
 Character get_next_char() {
   line_pos++;
@@ -158,6 +172,7 @@ Token get_token() {
       token.line_pos = character.line_pos + 1;
     }
     save = 1;
+    printf("character.c = '%c'\n", character.c);
     switch(state) {
       case START:
 	if(character.c == ' ' || character.c == '\t' || character.c == '\n') state = START;
