@@ -1,33 +1,39 @@
 #include "global.h"
 #include "scanner.h"
+#include "code-gen.h"
 
 int line_no;
+int char_no;
 FILE *source;
+Token current_token;
 
 void vcc_prologue();
 void process_cmd_argu();
 void start_up_process();
-void translate();
 void clean_up_process();
 void vcc_epilogue();
 
 int main(int argc, char *argv[]) {
 
-  Token token;
   line_no = 0;
   source = fopen(argv[1], "r");
+  int error_level;
 
-  token = get_token();
-  print_token(token);
   vcc_prologue();
+
   process_cmd_argu();
+
   start_up_process();
-  translate();
+
+  error_level = translate();
+
   clean_up_process();
+
   vcc_epilogue();
 
   fclose(source);
-  return 0;
+
+  exit(0);
 }
 
 void vcc_prologue() {
@@ -58,16 +64,5 @@ void clean_up_process() {
   //release symbol table
   //close files
   //other
-}
-
-void translate() {
-  current_token = get_token();
-  if(current_token != EOF) {
-    code("prog_hdr");
-    do{
-      current_token = get_token();
-    }while(current_token != EOF);
-    code("prog_end");
-  }
 }
 

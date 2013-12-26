@@ -47,6 +47,7 @@ Character get_next_char() {
     character.c = line_buffer[line_pos];
     character.line_no = line_no;
     character.line_pos = line_pos;
+    char_no = line_pos;
     return character;
   }
   else {
@@ -57,6 +58,7 @@ Character get_next_char() {
       character.c = line_buffer[line_pos];
       character.line_no = line_no;
       character.line_pos = line_pos;
+      char_no = line_pos;
       return character;
     }
     else {
@@ -64,6 +66,7 @@ Character get_next_char() {
       character.c = EOF;
       character.line_no = line_no;
       character.line_pos = line_pos;
+      char_no = line_pos;
       return character;
     }
   }

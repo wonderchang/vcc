@@ -6,11 +6,6 @@
 //The Number of the reserved words
 #define MAX_RW_NUM 14
 
-//The source filename (Global)
-extern FILE *source;
-//The number of line which is processing
-extern int line_no;
-
 //The type of token
 typedef enum {
   //Reserved word
@@ -36,4 +31,11 @@ typedef struct {
   int line_pos;
   TokenType type;
 } Token;
+
+//The source filename (Global)
+extern FILE *source;
+//The number of line which is processing
+extern int line_no;
+extern int char_no;
+//The current token of the current pass
 
