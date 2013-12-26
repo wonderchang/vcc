@@ -1,11 +1,10 @@
-#include "global.h"
+#include "main.h"
 #include "scanner.h"
 #include "code-gen.h"
 
 int line_no;
-int char_no;
+int line_pos;
 FILE *source;
-Token current_token;
 
 void vcc_prologue();
 void process_cmd_argu();
@@ -15,8 +14,10 @@ void vcc_epilogue();
 
 int main(int argc, char *argv[]) {
 
-  line_no = 0;
   source = fopen(argv[1], "r");
+  line_no = 0;
+  line_pos = 0;
+
   int error_level;
 
   vcc_prologue();

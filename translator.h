@@ -1,7 +1,13 @@
 void translate();
 void program();
-void pro_hdr(Token token);
-void pro_body(Token token);
+void pro_hdr();
+void pro_body();
+void DCL_LIST();
+void CONST_DCL();
+void CONST_STMT();
+void LITERAL(Token token);
+void VAR_DCL();
 void VC_ERR(char *err_message);
 void VC_MATCH(Token token);
-void VC_CHECK(Token first, Token follow);
+void VC_CHECK(Token op, Token op1, Token o2, Token o3, Token o4, Token o5, Token op6, Token op7, Token op8);
+int is_datatype_except_const(Token token);

@@ -1,9 +1,5 @@
-#include "global.h"
+#include "main.h"
 #include "scanner.h"
-
-//The position of the line
-int line_pos;
-int token_no = 0;
 
 //The buffer which store the reading line
 char line_buffer[MAX_BUFLEN];
@@ -39,15 +35,12 @@ static struct {
   {"main", MAIN}, {"FALSE", FALSE}, {"TRUE", TRUE}
 };
 
-Character get_next_char() {
+int get_next_char() {
   line_pos++;
-  Character character;
+  int character;
   if(line_buffer[line_pos]) {
     //line_buffer haven't end, get the next char
-    character.c = line_buffer[line_pos];
-    character.line_no = line_no;
-    character.line_pos = line_pos;
-    char_no = line_pos;
+    character = line_buffer[line_pos];
     return character;
   }
   else {
@@ -55,18 +48,12 @@ Character get_next_char() {
     if(fgets(line_buffer, MAX_BUFLEN - 1, source) != NULL) {
       line_no++;
       line_pos = 0;
-      character.c = line_buffer[line_pos];
-      character.line_no = line_no;
-      character.line_pos = line_pos;
-      char_no = line_pos;
+      character = line_buffer[line_pos];
       return character;
     }
     else {
       EOF_flag = 1;
-      character.c = EOF;
-      character.line_no = line_no;
-      character.line_pos = line_pos;
-      char_no = line_pos;
+      character = EOF;
       return character;
     }
   }
@@ -89,95 +76,91 @@ static TokenType reserved_lookup (char * s) {
 Token get_token() {
 
   Token token;
-  Character character;
   StateType state = START;
   int token_string_index = 0; 
+  int character;
   int save;
 
   while(state != DONE) {
     character = get_next_char();
-    if(state == START) {
-      token.line_no = character.line_no;
-      token.line_pos = character.line_pos + 1;
-    }
     save = 1;
     switch(state) {
       case START:
-	if(character.c == ' ' || character.c == '\t' || character.c == '\n') state = START;
-	else if(isalpha(character.c)) state = INID;
-	else if(isdigit(character.c)) state = INNUM;
-	else if(character.c == '\"') state = INSTRING;
-	else if(character.c == '\'') state = BEG_CHAR;
-	else if(character.c == '=') state = IN_EQ;
-	else if(character.c == '!') state = IN_NEQ;
-	else if(character.c == '<') state = IN_LT;
-	else if(character.c == '>') state = IN_GT;
-	else if(character.c == '/') state = IN_SLASH;
-	else if(character.c == '+') { state = READY_DONE; token.type = PLUS; }
-	else if(character.c == '-') { state = READY_DONE; token.type = MINUS; }
-	else if(character.c == '*') { state = READY_DONE; token.type = TIMES; }
-	else if(character.c == '%') { state = READY_DONE; token.type = MODE; }
-	else if(character.c == '(') { state = READY_DONE; token.type = LP; }
-	else if(character.c == ')') { state = READY_DONE; token.type = RP; }
-	else if(character.c == ',') { state = READY_DONE; token.type = COMMA; }
-	else if(character.c == ';') { state = READY_DONE; token.type = SEMICO; }
-	else if(character.c == '{') { state = READY_DONE; token.type = LB; }
-	else if(character.c == '}') { state = READY_DONE; token.type = RB; }
-	else if(character.c == EOF) { state = DONE; token.type = END_FILE; }
+	if(character == ' ' || character == '\t' || character == '\n') state = START;
+	else if(isalpha(character)) state = INID;
+	else if(isdigit(character)) state = INNUM;
+	else if(character == '\"') { state = INSTRING; save = 0; }
+	else if(character == '\'') { state = BEG_CHAR; save = 0; }
+	else if(character == '=') state = IN_EQ;
+	else if(character == '!') state = IN_NEQ;
+	else if(character == '<') state = IN_LT;
+	else if(character == '>') state = IN_GT;
+	else if(character == '/') state = IN_SLASH;
+	else if(character == '+') { state = READY_DONE; token.type = PLUS; }
+	else if(character == '-') { state = READY_DONE; token.type = MINUS; }
+	else if(character == '*') { state = READY_DONE; token.type = TIMES; }
+	else if(character == '%') { state = READY_DONE; token.type = MODE; }
+	else if(character == '(') { state = READY_DONE; token.type = LP; }
+	else if(character == ')') { state = READY_DONE; token.type = RP; }
+	else if(character == ',') { state = READY_DONE; token.type = COMMA; }
+	else if(character == ';') { state = READY_DONE; token.type = SEMICO; }
+	else if(character == '{') { state = READY_DONE; token.type = LB; }
+	else if(character == '}') { state = READY_DONE; token.type = RB; }
+	else if(character == EOF) { state = DONE; token.type = END_FILE; }
 	else { state = DONE; token.type = ERROR; back_next_char(); }
 	break;
       case INID:
-	if(isdigit(character.c)) state = INID;
-	else if(isalpha(character.c)) state = INID;
+	if(isdigit(character)) state = INID;
+	else if(isalpha(character)) state = INID;
 	else { state = DONE; token.type = ID; back_next_char(); }
 	break;
       case INNUM:
-	if(isdigit(character.c)) state = INNUM;
-	else if(!isalpha(character.c)) { state = DONE; token.type = NUMBER; back_next_char(); }
+	if(isdigit(character)) state = INNUM;
+	else if(!isalpha(character)) { state = DONE; token.type = NUMBER; back_next_char(); }
 	else { state = DONE; token.type = ERROR; back_next_char(); }
 	break;
       case INSTRING:
-	if(character.c == '\"') { state = READY_DONE; token.type = STR_CONST; }
+	if(character == '\"') { state = READY_DONE; token.type = STR_CONST; save = 0; }
 	else state = INSTRING;
 	break;
       case BEG_CHAR:
 	state = END_CHAR;
 	break;
       case END_CHAR:
-	if(character.c == '\'') { state = READY_DONE; token.type = CHAR_CONST; }
+	if(character == '\'') { state = READY_DONE; token.type = CHAR_CONST; save = 0; }
 	else { state = DONE; token.type = ERROR; back_next_char(); }
 	break;
       case IN_EQ:
-	if(character.c == '=') { state = DONE; token.type = EQ; back_next_char(); }
+	if(character == '=') { state = DONE; token.type = EQ; back_next_char(); }
 	else { state = DONE; token.type = ASSIGN; back_next_char(); }
 	break;
       case IN_NEQ:
-	if(character.c == '=') { state = DONE; token.type = NEQ; back_next_char(); }
+	if(character == '=') { state = DONE; token.type = NEQ; back_next_char(); }
 	else { state = DONE; token.type = ERROR; back_next_char(); }
 	break;
       case IN_LT:
-	if(character.c == '=') { state = DONE; token.type = LTEQ; back_next_char(); }
+	if(character == '=') { state = DONE; token.type = LTEQ; back_next_char(); }
 	else { state = DONE; token.type = LT; back_next_char(); } 
 	break;
       case IN_GT:
-	if(character.c == '=') { state = DONE; token.type = GTEQ; back_next_char(); }
+	if(character == '=') { state = DONE; token.type = GTEQ; back_next_char(); }
 	else { state = DONE; token.type = GT; back_next_char(); }
 	break;
       case IN_SLASH:
-	if(character.c == '/') state = SINGLE_COMMENT;
-	else if(character.c == '*') state = MULTI_COMMENT;
+	if(character == '/') state = SINGLE_COMMENT;
+	else if(character == '*') state = MULTI_COMMENT;
 	else { state = DONE; token.type = DIVIDE; back_next_char(); }
 	break;
       case SINGLE_COMMENT:
-	if(character.c == '\n') { state = DONE; token.type = COMMENT; back_next_char(); }
+	if(character == '\n') { state = DONE; token.type = COMMENT; back_next_char(); }
 	else state = SINGLE_COMMENT;
 	break;
       case MULTI_COMMENT:
-	if(character.c == '*') state = END_MULTI_COMMENT;
+	if(character == '*') state = END_MULTI_COMMENT;
 	else state = MULTI_COMMENT;
 	break;
       case END_MULTI_COMMENT:
-	if(character.c == '/') { state = READY_DONE; token.type = COMMENT; }
+	if(character == '/') { state = READY_DONE; token.type = COMMENT; }
 	else state = MULTI_COMMENT;
 	break;
       case READY_DONE:
@@ -192,19 +175,17 @@ Token get_token() {
     }
     if(state == DONE) { 
       if(token.type == ERROR)
-	token_string[token_string_index++] = (char) character.c;
+	token_string[token_string_index++] = (char) character;
       token_string[token_string_index] = '\0';
       if(token.type == ID)
 	token.type = reserved_lookup(token_string);
     }
     else {
       if(state != START && (save) && (token_string_index <= MAX_TOKENLEN)) {
-	token_string[token_string_index++] = (char) character.c;
+	token_string[token_string_index++] = (char) character;
       }
     }
   }
-  token_no += 1;
-  token.id = token_no;
   if(token.type == END_FILE)
     token.string = "EOF";
   else 
@@ -213,7 +194,7 @@ Token get_token() {
 }
 
 void print_token(Token token) {
-  printf("filename.c:%d:%d, token ID: %d, ", token.line_no, token.line_pos, token.id);
+  printf("filename.c:%d:%d, ", line_no, line_pos);
   print_token_type(token.type);
   printf("\t\ttoken: [%s]\n", token.string);
 }

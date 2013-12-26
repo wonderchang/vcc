@@ -25,17 +25,13 @@ typedef enum {
 
 //The token structure that contains some info
 typedef struct {
-  int id;
   char* string;
-  int line_no;
-  int line_pos;
   TokenType type;
 } Token;
 
 //The source filename (Global)
 extern FILE *source;
-//The number of line which is processing
+//The position of each processing in the file
 extern int line_no;
-extern int char_no;
-//The current token of the current pass
+extern int line_pos;
 
