@@ -47,6 +47,7 @@ void pro_body() {
   code(PROG_END);
 }
 
+/*
 void DCL_LIST() {
   //DCL_LIST -> (CONST_DCL | VAR_DCL) DCL_LIST
   while(current_token.type == CONST || is_datatype_except_const(current_token)){
@@ -126,16 +127,14 @@ void VAR_DCL() {
     VC_ERR("; expected");
 }
 
-int is_datatype_except_const(Token token) {
-  if(token.type == INT || token.type == CHAR || token.type == STRING || token.type == BOOL)
-    return 1;
-  else 
-    return 0;
-}
+*/
+
 
 void VC_ERR(char *err_message) {
-  if(err_message != NULL)
+  if(err_message != NULL) {
     printf("%d:%d, Error: %s\n", line_no, line_pos, err_message);
+    fprintf(err_f, "%d:%d, Error: %s\n", line_no, line_pos, err_message);
+  }
 }
 
 void VC_MATCH(Token token) {
@@ -152,3 +151,11 @@ void VC_CHECK(Token op, Token op1, Token o2, Token o3, Token o4, Token o5, Token
   }
 }
 
+/*
+int is_datatype_except_const(Token token) {
+  if(token.type == INT || token.type == CHAR || token.type == STRING || token.type == BOOL)
+    return 1;
+  else 
+    return 0;
+}
+*/

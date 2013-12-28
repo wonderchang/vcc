@@ -29,8 +29,11 @@ typedef struct {
   TokenType type;
 } Token;
 
-//The source filename (Global)
-extern FILE *source;
+//The input file pointer
+extern FILE *src_f;
+//The output file pointer
+extern FILE *obj_f;
+extern FILE *err_f;
 //The position of each processing in the file
 extern int line_no;
 extern int line_pos;

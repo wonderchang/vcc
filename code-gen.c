@@ -35,11 +35,11 @@ void emit_epilogue() {
   fprintf(obj_c, "\tEND\t_main\n");
 }
 
-void emit_comments() {
+void emit_comments(char *comment) {
   fprintf(obj_f, "; %s\n", comment);
 }
 
-void emit_data_segment(char *comment) {
+void emit_data_segment() {
   fprintf(obj_f, ".DATA\n");
 }
 

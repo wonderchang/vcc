@@ -45,7 +45,7 @@ int get_next_char() {
   }
   else {
     //line_buffer ended, fget next line, and get the first char
-    if(fgets(line_buffer, MAX_BUFLEN - 1, source) != NULL) {
+    if(fgets(line_buffer, MAX_BUFLEN - 1, src) != NULL) {
       line_no++;
       line_pos = 0;
       character = line_buffer[line_pos];
