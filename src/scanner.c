@@ -15,7 +15,7 @@ typedef enum {
   //White space
   BLANK,
   //Identifier and number
-  INID, INNUM,
+  INID, INNUM, INSIGN, IN_PLUS, IN_MINUS,
   //Characters
   INSTRING, BEG_CHAR, END_CHAR,
   //Conditions
@@ -96,8 +96,8 @@ Token get_token() {
 	else if(character == '<') state = IN_LT;
 	else if(character == '>') state = IN_GT;
 	else if(character == '/') state = IN_SLASH;
-	else if(character == '+') { state = READY_DONE; token.type = PLUS; }
-	else if(character == '-') { state = READY_DONE; token.type = MINUS; }
+	else if(character == '+') state = IN_PLUS;
+	else if(character == '-') state = IN_MINUS;
 	else if(character == '*') { state = READY_DONE; token.type = TIMES; }
 	else if(character == '%') { state = READY_DONE; token.type = MODE; }
 	else if(character == '(') { state = READY_DONE; token.type = LP; }
@@ -162,6 +162,18 @@ Token get_token() {
       case END_MULTI_COMMENT:
 	if(character == '/') { state = READY_DONE; token.type = COMMENT; }
 	else state = MULTI_COMMENT;
+	break;
+      case INSIGN:
+	if(isdigit(character)) state = INSIGN;
+	else { state = DONE; token.type = SIGN_NUM; back_next_char(); }
+	break;
+      case IN_PLUS:
+	if(isdigit(character)) state = INSIGN;
+	else { state = DONE; token.type = PLUS; back_next_char(); }
+	break;
+      case IN_MINUS:
+	if(isdigit(character)) state = INSIGN;
+	else { state = DONE; token.type = MINUS; back_next_char(); }
 	break;
       case READY_DONE:
 	state = DONE; back_next_char();

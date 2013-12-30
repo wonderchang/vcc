@@ -34,16 +34,18 @@ int main(int argc, char *argv[]) {
 void vcc_prologue() {
   //Display process start-up message
   //record data/time
-  printf("\nVenilla-C Compiler\n");
-  printf("Start to compile.\n");
-  printf("The input file: %s\n", src_name);
+  printf("\nVenilla-C Compiler version 1.0\n");
+  printf("Implement by student Wonder Chang.\n");
+  printf("Compiler course from NCKU EE.\n");
+  printf("Teacher: Jing Chen.\n");
+  printf("\nStart to compile. The input file: %s\n", src_name);
 }
 
 void vcc_epilogue() {
   //Display process terminating message
   //record data/time
   //dislay statistics
-  printf("Compile completed.\n\n");
+  printf("\nCompile completed.\n");
 }
 
 void process_cmd_argu() {
@@ -65,7 +67,7 @@ void start_up_process() {
   //Create symbol table 
   //Initialize symbol table (e.g. reserved words) 
   //open required files
-  printf("Start up process.\n");
+  printf("\nStart up process.\n");
 }
 
 void clean_up_process() {
@@ -76,6 +78,6 @@ void clean_up_process() {
   fclose(src_f);
   fclose(obj_f);
   fclose(err_f);
-  printf("Clean up process.\n");
+  printf("\nClean up process.\n");
 }
 

@@ -22,6 +22,8 @@ int translate() {
 
 
 void program() {
+  while(current_token.type == COMMENT) 
+    current_token = get_token();
   if(current_token.type != MAIN) 
     VC_ERR("main expected");
   pro_hdr(current_token);
@@ -139,6 +141,8 @@ void VC_ERR(char *err_message) {
 }
 
 void VC_MATCH(TokenType token_type) {
+  while(current_token.type == COMMENT)
+    current_token = get_token();
   if(current_token.type == token_type) {
     //printf("match, current_token = %d, token = %d\n", current_token.type, token_type);
     current_token = get_token();
@@ -149,6 +153,8 @@ void VC_MATCH(TokenType token_type) {
   }
 }
 void VC_CHECK(TokenType op, TokenType op1, TokenType op2, TokenType op3, TokenType op4, TokenType op5, TokenType op6, TokenType op7, TokenType op8) {
+  while(current_token.type == COMMENT)
+    current_token = get_token();
   //printf("now current_token = %d\n", current_token.type);
   while(current_token.type != op && current_token.type != op1 && current_token.type != op2 && current_token.type != op3 && current_token.type != op4 && current_token.type != op5 && current_token.type != op6 && current_token.type != op7 && current_token.type != op8) {
     current_token = get_token();
