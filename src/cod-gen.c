@@ -1,5 +1,6 @@
 #include "./include/main.h"
-#include "./include/code-gen.h"
+#include "./include/err-han.h"
+#include "./include/cod-gen.h"
 
 void code(ProgramState program_state) {
   switch(program_state) {

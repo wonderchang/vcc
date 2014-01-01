@@ -1,8 +1,5 @@
-#include <stdio.h>
-
-int main() {
-  bool aaa = 
-}
+#include "./include/main.h"
+#include "./include/sym-tab.h"
 
 
 

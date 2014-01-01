@@ -1,9 +1,9 @@
 #include "./include/main.h"
 #include "./include/scan.h"
 #include "./include/tran.h"
-#include "./include/code-gen.h"
+#include "./include/err-han.h"
+#include "./include/cod-gen.h"
 
-Token current_token;
 int error_level;
 
 int translate() {
@@ -134,29 +134,6 @@ void VAR_DCL() {
 
 
 
-void VC_MATCH(TokenType token_type) {
-  while(current_token.type == COMMENT)
-    current_token = get_token();
-  if(current_token.type == token_type) {
-    //printf("match, current_token = %d, token = %d\n", current_token.type, token_type);
-    current_token = get_token();
-  }
-  else {
-    //printf("not match, current_token = %d, token = %d\n", current_token.type, token_type);
-    VC_ERR("token expected");
-    exit(1);
-  }
-}
-void VC_CHECK(TokenType op, TokenType op1, TokenType op2, TokenType op3, TokenType op4, TokenType op5, TokenType op6, TokenType op7, TokenType op8) {
-  while(current_token.type == COMMENT)
-    current_token = get_token();
-  //printf("now current_token = %d\n", current_token.type);
-  while(current_token.type != op && current_token.type != op1 && current_token.type != op2 && current_token.type != op3 && current_token.type != op4 && current_token.type != op5 && current_token.type != op6 && current_token.type != op7 && current_token.type != op8) {
-    current_token = get_token();
-    //printf("skip, current_token = %d\n", current_token.type);
-    VC_ERR("Unexpected token");
-  }
-}
 
 /*
 int is_datatype_except_const(Token token) {

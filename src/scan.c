@@ -1,5 +1,7 @@
 #include "./include/main.h"
 #include "./include/scan.h"
+#include "./include/err-han.h"
+#include "./include/dbg-aid.h"
 
 //The buffer which store the reading line
 char line_buffer[MAX_BUFLEN];
@@ -7,6 +9,9 @@ char line_buffer[MAX_BUFLEN];
 char token_string[MAX_TOKENLEN + 1];
 //The flag that record it is end of file or not
 int EOF_flag = 0;
+//The current character position
+int line_no = 0;
+int char_pos = 0;
 
 //The type of state
 typedef enum { 
@@ -21,7 +26,9 @@ typedef enum {
   //Conditions
   IN_EQ, IN_NEQ, IN_LT, IN_GT,
   //Comments
-  IN_SLASH, SINGLE_COMMENT, MULTI_COMMENT, END_MULTI_COMMENT
+  IN_SLASH, SINGLE_COMMENT, MULTI_COMMENT, END_MULTI_COMMENT,
+  //Error
+  ST_ERR, NUM_ERR, CHAR_ERR, NEQ_ERR
 } StateType;
 
 //The reserved word list, used to get the reserved word token
@@ -36,19 +43,19 @@ static struct {
 };
 
 int get_next_char() {
-  line_pos++;
+  char_pos++;
   int character;
-  if(line_buffer[line_pos]) {
+  if(line_buffer[char_pos]) {
     //line_buffer haven't end, get the next char
-    character = line_buffer[line_pos];
+    character = line_buffer[char_pos];
     return character;
   }
   else {
     //line_buffer ended, fget next line, and get the first char
     if(fgets(line_buffer, MAX_BUFLEN - 1, src_f) != NULL) {
       line_no++;
-      line_pos = 0;
-      character = line_buffer[line_pos];
+      char_pos = 0;
+      character = line_buffer[char_pos];
       return character;
     }
     else {
@@ -60,7 +67,7 @@ int get_next_char() {
 }
 
 void back_next_char() {
-  if(!EOF_flag) line_pos--;
+  if(!EOF_flag) char_pos--;
 }
 
 /* lookup an identifier to see if it is a reserved word */
@@ -77,12 +84,14 @@ Token get_token() {
 
   Token token;
   StateType state = START;
+  token_line_no = line_no;
   int token_string_index = 0; 
   int character;
   int save;
 
   while(state != DONE) {
     character = get_next_char();
+    if(state == START) token_line_pos = char_pos + 1;
     save = 1;
     switch(state) {
       case START:
@@ -91,13 +100,13 @@ Token get_token() {
 	else if(isdigit(character)) state = INNUM;
 	else if(character == '\"') { state = INSTRING; save = 0; }
 	else if(character == '\'') { state = BEG_CHAR; save = 0; }
-	else if(character == '=') state = IN_EQ;
-	else if(character == '!') state = IN_NEQ;
-	else if(character == '<') state = IN_LT;
-	else if(character == '>') state = IN_GT;
-	else if(character == '/') state = IN_SLASH;
-	else if(character == '+') state = IN_PLUS;
-	else if(character == '-') state = IN_MINUS;
+	else if(character == '=') { state = IN_EQ; }
+	else if(character == '!') { state = IN_NEQ; }
+	else if(character == '<') { state = IN_LT; }
+	else if(character == '>') { state = IN_GT; }
+	else if(character == '/') { state = IN_SLASH; }
+	else if(character == '+') { state = IN_PLUS; }
+	else if(character == '-') { state = IN_MINUS; }
 	else if(character == '*') { state = READY_DONE; token.type = TIMES; }
 	else if(character == '%') { state = READY_DONE; token.type = MODE; }
 	else if(character == '(') { state = READY_DONE; token.type = LP; }
@@ -107,7 +116,7 @@ Token get_token() {
 	else if(character == '{') { state = READY_DONE; token.type = LB; }
 	else if(character == '}') { state = READY_DONE; token.type = RB; }
 	else if(character == EOF) { state = DONE; token.type = END_FILE; }
-	else { state = DONE; token.type = ERROR; back_next_char(); }
+	else state = ST_ERR;
 	break;
       case INID:
 	if(isdigit(character)) state = INID;
@@ -117,7 +126,7 @@ Token get_token() {
       case INNUM:
 	if(isdigit(character)) state = INNUM;
 	else if(!isalpha(character)) { state = DONE; token.type = NUMBER; back_next_char(); }
-	else { state = DONE; token.type = ERROR; back_next_char(); }
+	else state = NUM_ERR;
 	break;
       case INSTRING:
 	if(character == '\"') { state = READY_DONE; token.type = STR_CONST; save = 0; }
@@ -128,22 +137,22 @@ Token get_token() {
 	break;
       case END_CHAR:
 	if(character == '\'') { state = READY_DONE; token.type = CHAR_CONST; save = 0; }
-	else { state = DONE; token.type = ERROR; back_next_char(); }
+	else state = CHAR_ERR;
 	break;
       case IN_EQ:
-	if(character == '=') { state = DONE; token.type = EQ; back_next_char(); }
+	if(character == '=') { state = READY_DONE; token.type = EQ; }
 	else { state = DONE; token.type = ASSIGN; back_next_char(); }
 	break;
       case IN_NEQ:
-	if(character == '=') { state = DONE; token.type = NEQ; back_next_char(); }
-	else { state = DONE; token.type = ERROR; back_next_char(); }
+	if(character == '=') { state = READY_DONE; token.type = NEQ; }
+	else state = NEQ_ERR;
 	break;
       case IN_LT:
-	if(character == '=') { state = DONE; token.type = LTEQ; back_next_char(); }
+	if(character == '=') { state = READY_DONE; token.type = LTEQ; back_next_char(); }
 	else { state = DONE; token.type = LT; back_next_char(); } 
 	break;
       case IN_GT:
-	if(character == '=') { state = DONE; token.type = GTEQ; back_next_char(); }
+	if(character == '=') { state = READY_DONE; token.type = GTEQ; back_next_char(); }
 	else { state = DONE; token.type = GT; back_next_char(); }
 	break;
       case IN_SLASH:
@@ -164,7 +173,7 @@ Token get_token() {
 	else state = MULTI_COMMENT;
 	break;
       case INSIGN:
-	if(isdigit(character)) state = INSIGN;
+	if(isdigit(character)) { state = INSIGN; }
 	else { state = DONE; token.type = SIGN_NUM; back_next_char(); }
 	break;
       case IN_PLUS:
@@ -180,14 +189,51 @@ Token get_token() {
 	break;
       case DONE:
 	break;
+      case ST_ERR:
+	switch(character) {
+	  case ' ': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case ',': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case ';': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case '}': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case ')': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case EOF: state = DONE; token.type = ERROR; back_next_char(); break;
+	  default: state = ST_ERR;
+	}
+	break;
+      case NUM_ERR:
+	switch(character) {
+	  case ' ': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case ',': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case ';': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case '}': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case ')': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case '+': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case '-': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case '=': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case '>': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case '<': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case '/': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case '*': state = DONE; token.type = ERROR; back_next_char(); break;
+	  case '%': state = DONE; token.type = ERROR; back_next_char(); break;
+	  default: state = NUM_ERR;
+	}
+	break;
+      case CHAR_ERR:
+	if(character == '\'' || character == ';' || character == '}' || character == ')' || character == EOF) { state = DONE; token.type = ERROR; save = 0; }
+	else state = CHAR_ERR;
+	break;
+      case NEQ_ERR:
+	if(character == ';' || character == '}' || character == ')' || character == EOF) { state = DONE; token.type = ERROR; back_next_char(); }
+	else state = NEQ_ERR;
+	break;
       default:
 	state = DONE; token.type = ERROR; back_next_char();
-	printf("The Unexpected State, Fucking Bug!\n");
+	printf("The Unexpected State, Fucking bug from state switch part!\n");
 	break;
     }
     if(state == DONE) { 
       if(token.type == ERROR)
-	token_string[token_string_index++] = (char) character;
+	token_string[token_string_index] = (char) character;
       token_string[token_string_index] = '\0';
       if(token.type == ID)
 	token.type = reserved_lookup(token_string);
@@ -204,5 +250,4 @@ Token get_token() {
     token.string = token_string;
   return token;
 }
-
 
