@@ -26,7 +26,7 @@ void emit_prologue() {
   fprintf(obj_f, "global\t_start\n");
   fprintf(obj_f, "_start:\n");
   emit_comments("\tThe main program begin");
-  fprintf(obj_f, "\tint 80h\n");
+  //fprintf(obj_f, "\tint 80h\n");
 }
 
 void emit_epilogue() {

@@ -1,6 +1,6 @@
 #include "./include/main.h"
-#include "./include/scanner.h"
-#include "./include/translator.h"
+#include "./include/scan.h"
+#include "./include/tran.h"
 #include "./include/code-gen.h"
 
 Token current_token;
@@ -133,12 +133,6 @@ void VAR_DCL() {
 */
 
 
-void VC_ERR(char *err_message) {
-  if(err_message != NULL) {
-    printf("%s:%d:%d, Error: %s\n", src_name, line_no, line_pos, err_message);
-    fprintf(err_f, "%s:%d:%d, Error: %s\n", src_name, line_no, line_pos, err_message);
-  }
-}
 
 void VC_MATCH(TokenType token_type) {
   while(current_token.type == COMMENT)
@@ -150,6 +144,7 @@ void VC_MATCH(TokenType token_type) {
   else {
     //printf("not match, current_token = %d, token = %d\n", current_token.type, token_type);
     VC_ERR("token expected");
+    exit(1);
   }
 }
 void VC_CHECK(TokenType op, TokenType op1, TokenType op2, TokenType op3, TokenType op4, TokenType op5, TokenType op6, TokenType op7, TokenType op8) {

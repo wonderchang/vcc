@@ -1,5 +1,5 @@
 #include "./include/main.h"
-#include "./include/scanner.h"
+#include "./include/scan.h"
 #include "./include/code-gen.h"
 
 int line_no;
@@ -35,9 +35,9 @@ void vcc_prologue() {
   //Display process start-up message
   //record data/time
   printf("\nVenilla-C Compiler version 1.0\n");
-  printf("Implement by student Wonder Chang.\n");
-  printf("Compiler course from NCKU EE.\n");
-  printf("Teacher: Jing Chen.\n");
+  printf("-Implement by student Wonder Chang.\n");
+  printf("-Compiler course from NCKU EE.\n");
+  printf("-Teacher: Jing Chen.\n");
   printf("\nStart to compile. The input file: %s\n", src_name);
 }
 
