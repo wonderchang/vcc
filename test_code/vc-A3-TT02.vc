@@ -1,0 +1,33 @@
+/*
+/**************************************************
+ *                                                *
+ *   Program: vc-A3-TT02.vc                       *
+ *                                                *
+ *   Vanilla-C compiler test program TT02         *
+ *   Purpose: Testing Vanilla-C compiler of A3    *
+ *   Test Items:                                  *
+ *     (1) Basic program unit and Input/Output    *
+ *     (2) Assignment & Expression                *
+ *     (3) I/O Statements - read/print/println    *
+ *   Note: This is a template.                    *
+ *   Date: 2013/12/08                             *
+ **************************************************
+*/
+main()
+{
+  // ----------------------------------------------
+  //   SYMBOLIC CONSTANTS AND VARIABLES
+  // ----------------------------------------------
+     const    M1 = "Hello";
+     string   N;
+     int      A1, A2;
+  // ----------------------------------------------
+  //   PROCESSING STATEMENTS
+  // ----------------------------------------------
+  println("What is your name?");
+  read ('N');
+  print(M1, ',');
+  println(N);
+  println("Good-bye.");
+  // --- END OF PROGRAM ---------------------------  
+}

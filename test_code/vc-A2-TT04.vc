@@ -1,0 +1,35 @@
+/*
+/**************************************************
+ *                                                *
+ *   Program: vc-A2-TT04.vc                       *
+ *                                                *
+ *   Vanilla-C compiler test program vc-A2-TT04   *
+ *   Purpose: Testing Vanilla-C compiler of A2    *
+ *   Test Items:                                  *
+ *     (1) Program unit                           *
+ *     (2) Declaration of symbolic constants      *
+ *     (3) Declaration of variables               *
+ *   Note: This is a testing program.             *
+ *   Date: 2013/12/19                             *
+ **************************************************
+*/
+main()
+{
+  // ----------------------------------------------
+  //   SYMBOLIC CONSTANTS AND VARIABLES
+  // ----------------------------------------------
+  int   X1,     Y1,,    False;
+  const	abc1= False, 	abc2 = X1;
+  const	char = 'A',	string  = 'B';
+  const s123 = "String 123!";
+  const b88 = char,	b99  = True;
+  int   x1, y2, z3 = 77;
+  char  a4, b5;
+  string  s6;
+  const B77=b99;
+  // ----------------------------------------------
+  //   PROCESSING STATEMENTS
+  // ----------------------------------------------
+
+  // --- END OF PROGRAM ---------------------------  
+}

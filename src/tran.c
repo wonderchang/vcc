@@ -1,10 +1,9 @@
 #include "./include/main.h"
 #include "./include/scan.h"
 #include "./include/tran.h"
+#include "./include/util.h"
 #include "./include/err-han.h"
 #include "./include/cod-gen.h"
-
-int error_level;
 
 int translate() {
   current_token = get_token();
@@ -17,7 +16,7 @@ int translate() {
   else {
     VC_ERR("The file is empty");
   }
-  return error_level;
+  return 0;
 }
 
 
@@ -39,107 +38,91 @@ void pro_hdr() {
 }
 
 void pro_body() {
-  if(current_token.type != LB)
-    VC_ERR("{ missing");
+  VC_MATCH(LB);
   code(PROG_HDR);
-  current_token = get_token();
   VC_CHECK(CONST, INT, CHAR, STRING, BOOL, RB, END_FILE, END_FILE, END_FILE);
-  //if(current_token.type != END_FILE)
-    //DCL_LIST();
+  if(current_token.type != END_FILE)
+    DCL_LIST();
   VC_MATCH(RB);
   code(PROG_END);
 }
 
-/*
 void DCL_LIST() {
   //DCL_LIST -> (CONST_DCL | VAR_DCL) DCL_LIST
   while(current_token.type == CONST || is_datatype_except_const(current_token)){
-    if(current_token == CONST)
+    if(current_token.type == CONST)
       CONST_DCL();
     else
       VAR_DCL();
-    if(current_token != SEMICO)
+    if(current_token.type != SEMICO)
       VC_ERR("; missing");
-    VC_CHECK(CONST, INT, CHAR, STRING, BOOL, RB, END_FILE, NULL, NULL);
+    current_token = get_token();
+    VC_CHECK(CONST, INT, CHAR, STRING, BOOL, RB, END_FILE, END_FILE, END_FILE);
   }
 }
 
 void CONST_DCL() {
   //CONST_DCL -> const CONST_STMT (,CONST_STMT)
   current_token = get_token();
-  VC_CHECK(ID, SEMICO, CONST, INT, CHAR, STRING, BOOL, RB, END_FILE);
   CONST_STMT();
   current_token = get_token();
-  while(current_token == COMMA) {
+  VC_CHECK(COMMA, SEMICO, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE);
+  while(current_token.type == COMMA) {
+    current_token = get_token();
     CONST_STMT();
     current_token = get_token();
   }
 }
 
 void CONST_STMT() {
-  //CONST_STMT -> ID = ID | ID = LITERAL
-  VC_CHECK(ID, SEMICO, CONST, INT, CHAR, STRING, BOOL, RB, END_FILE);
-  Token data_type_token = get_token();
-  current_token = get_token();
-  if(current_token.type != ASSIGN)
-    VC_ERR("Error token, require =");
-  current_token = get_token();
-  if(current_token.type == ID)
-    create_id_val(current_token);
-  else
-    LITERAL(current_token);
-  insert(data_type_token, current_token);
-}
-
-void LITERAL(Token token) {
-  switch(token.type) {
-    case NUMBER: create_number(token.string) break;
-    case STRING_CONST: create_string(token.string) break;
-    case CHAR_CONST: create_char(token.string) break;
-    case BOOL_VAL: create_bool(token.string) break;
-    default: VC_ERR("Fucking Program Error, Unexpected condition"); break;
+  //CONST_STMT -> ID = ID | ID = literal
+  VC_CHECK(ID, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE);
+  if(current_token.type == ID) {
+    current_token = get_token();
+    printf("constant ID / ");
+    if(current_token.type != ASSIGN)
+      VC_ERR("= expected");
+    current_token = get_token();
+    if(current_token.type == ID)
+      printf("constant ID\n");//create_id_val(current_token);
+    else
+      literal(current_token);
+    //printf("insert\n");
+    //insert(data_type_token, current_token);
   }
+  else
+    VC_ERR("identifier expected");
 }
 
 void VAR_DCL() {
-  Token data_type_token = current_token;
+  TokenType data_type = current_token.type;
   current_token = get_token();
-  //VC_CHECK(ID, SEMICO, CONST, INT, CHAR, STRING, BOOL, RB, END_FILE);
-  if(current_token.type == ID) {
-    id_list_initialize(id_list);
-    id_list_append(id_list, current_token);
-  }
-  else
-    VC_ERR("Unexpected token. Require an identifier");
+  if(current_token.type != ID)
+    VC_ERR("identifier expected");
   current_token = get_token();
-
-  while(current_token == COMMA) {
-    VC_CHECK(CONST, INT, CHAR, STRING, BOOL, RB, END_FILE, NULL, NULL);
-    if(is_datatype_except_const(current_token)) {
-      current_token = get_token();
-      if(current_token == ID)
-	id_list_append(id_list, current_token);
-      else
-	VC_ERR("Unexpected token. Require an identifier");
-    }
-    else
-      VC_ERR("Unexpected data type");
+  VC_CHECK(COMMA, SEMICO, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE);
+  if(current_token.type != COMMA)
+    if(current_token.type != SEMICO) 
+      VC_ERR(", expected");
+  while(current_token.type == COMMA) {
+    current_token = get_token();
+    if(current_token.type != ID)
+      VC_ERR("identifier expected");
     current_token = get_token();
   }
-  if(current_token.type != SEMICO)
-    VC_ERR("; expected");
 }
 
-*/
-
-
-
-
-/*
-int is_datatype_except_const(Token token) {
-  if(token.type == INT || token.type == CHAR || token.type == STRING || token.type == BOOL)
-    return 1;
-  else 
-    return 0;
+void literal(Token token) {
+  switch(token.type) {
+    case NUMBER: printf("literal number\n"); /*create_number(token.string)*/ break;
+    case STR_CONST: printf("literal string\n"); /*create_string(token.string)*/ break;
+    case CHAR_CONST: printf("literal char\n"); /*create_char(token.string)*/ break;
+    case TRUE: printf("literal bool ture\n");/* create_bool(token.string)*/ break;
+    case FALSE: printf("literal bool false\n");/* create_bool(token.string)*/ break;
+    default: VC_ERR("constant value expected"); break;
+  }
 }
-*/
+
+
+
+

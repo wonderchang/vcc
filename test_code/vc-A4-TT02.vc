@@ -1,0 +1,38 @@
+/*
+/**************************************************
+ *                                                *
+ *   Program: vc-A4-TT02.vc                       *
+ *                                                *
+ *   Vanilla-C compiler test program TT02         *
+ *   Purpose: Testing Vanilla-C compiler of A4    *
+ *   Test Items:                                  *
+ *     (1) Program unit                           *
+ *     (2) Declaration of constants/variable      *
+ *     (3) Statements of Assignment, I/O, Control *
+ *         Structure                              *
+ *   Date: 2013/12/20                             *
+ **************************************************
+*/
+main()
+{
+  // ----------------------------------------------
+  //   SYMBOLIC CONSTANTS AND VARIABLES
+  // ----------------------------------------------
+    const  a1 = "GCD", c1 = '=';
+    int	A, B, K;
+
+  // ----------------------------------------------
+  //   PROCESSING STATEMENTS
+  // ----------------------------------------------
+
+    print( "Please enter A: "); read(A);
+    print( "Please enter B: "); read(B);
+    if (A < B) K = B % A; B = A; A = K;
+    	 else  K = A % B;
+    while(K != 0) { A = +B; B = K; K = A % +B; }
+    print( a1 );
+    print( c1 );
+    println(B);
+
+  // --- END OF PROGRAM ---------------------------  
+}

@@ -31,20 +31,25 @@ void VC_MATCH(TokenType token_type) {
     strcat(err_msg, token_type_string);
     strcat(err_msg, " expected.");
     VC_ERR(err_msg);
+    current_token = get_token();
     //To hold that no generate the three output file
-    remove_output_file();
-    exit(1);
+    //remove_output_file();
+    //exit(1);
   }
 }
 
 void VC_CHECK(TokenType op, TokenType op1, TokenType op2, TokenType op3, TokenType op4, TokenType op5, TokenType op6, TokenType op7, TokenType op8) {
+  //To skip the COMMENT token
   while(current_token.type == COMMENT)
     current_token = get_token();
-  //printf("now current_token = %d\n", current_token.type);
+  //printf("now current_token = %s\n", current_token.string);
   while(current_token.type != op && current_token.type != op1 && current_token.type != op2 && current_token.type != op3 && current_token.type != op4 && current_token.type != op5 && current_token.type != op6 && current_token.type != op7 && current_token.type != op8) {
-    current_token = get_token();
     //printf("skip, current_token = %d\n", current_token.type);
-    VC_ERR("Unexpected token");
+    clean_err_msg();
+    strcat(err_msg, "Unexpected token ");
+    strcat(err_msg, current_token.string);
+    VC_ERR(err_msg);
+    current_token = get_token();
   }
 }
 
@@ -57,57 +62,5 @@ void remove_output_file() {
 void clean_err_msg() {
   for(int i = 0; i < ERR_MSG_LEN; i++)
     err_msg[i] = '\0';
-}
-
-
-void get_token_type_string(TokenType token_type) {
-  switch(token_type) {
-    case SPACE: token_type_string = "space"; break;
-    case ID: token_type_string = "identifier"; break;
-    case NUMBER: token_type_string = "number"; break;
-    case CHAR_CONST: token_type_string = "character constant"; break;
-    case STR_CONST: token_type_string = "string constant"; break;
-    case BOOL_VAL: token_type_string = "boolean value"; break;
-    case COMMENT: token_type_string = "comment"; break;
-    case PLUS: token_type_string = "+"; break;
-    case MINUS: token_type_string = "-"; break;
-    case ASSIGN: token_type_string = "="; break;
-    case TIMES: token_type_string = "*"; break;
-    case DIVIDE: token_type_string = "/"; break;
-    case MODE: token_type_string = "%"; break;
-    case LT: token_type_string = "<"; break;
-    case LTEQ: token_type_string = "<="; break;
-    case GT: token_type_string = ">"; break;
-    case GTEQ: token_type_string = ">="; break;
-    case EQ: token_type_string = "=="; break;
-    case NEQ: token_type_string = "!="; break;
-    case LP: token_type_string = "("; break;
-    case RP: token_type_string = ")"; break;
-    case LB: token_type_string = "{"; break;
-    case RB: token_type_string = "}"; break;
-    case COMMA: token_type_string = ","; break;
-    case SEMICO: token_type_string = ";"; break;
-    case SQ: token_type_string = "\'"; break;
-    case DQ: token_type_string = "\""; break;
-    case BOOL: token_type_string = "bool"; break;
-    case CHAR: token_type_string = "char"; break;
-    case CONST: token_type_string = "const"; break;
-    case STRING: token_type_string = "string"; break;
-    case INT: token_type_string = "int"; break;
-    case IF: token_type_string = "if"; break;
-    case ELSE: token_type_string = "else"; break;
-    case WHILE: token_type_string = "while"; break;
-    case READ: token_type_string = "read"; break;
-    case PRINT: token_type_string = "print"; break;
-    case PRINTLN: token_type_string = "println"; break;
-    case MAIN: token_type_string = "main"; break;
-    case FALSE: token_type_string = "FALSE"; break;
-    case TRUE: token_type_string = "TRUE"; break;
-    case END_FILE: token_type_string = "EOF"; break;
-    case ERROR: token_type_string = "error"; break;
-    default:
-		token_type_string = "Unexpected token type occur, fucking bug in get_token_type_in_string function at err-han.c";
-		break;
-  }
 }
 
