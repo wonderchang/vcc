@@ -26,7 +26,7 @@ typedef enum {
 
 //The token structure that contains some info
 typedef struct {
-  char* string;
+  char *string;
   TokenType type;
 } Token;
 

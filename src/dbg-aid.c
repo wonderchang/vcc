@@ -5,7 +5,7 @@
 void print_token(Token token) {
   printf("filename.c:%d:%d, ", token_line_no, token_line_pos);
   print_token_type(token.type);
-  printf("\t\ttoken: [%s]\n", token.string);
+  printf("location(%p)\t\ttoken: [%s]\n", &(token.string), token.string);
 }
 
 //To Return the string that the token type it is, help the print_token function

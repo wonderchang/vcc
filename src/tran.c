@@ -4,6 +4,8 @@
 #include "./include/util.h"
 #include "./include/err-han.h"
 #include "./include/cod-gen.h"
+#include "./include/act-rou.h"
+
 
 int translate() {
   current_token = get_token();
@@ -43,13 +45,15 @@ void pro_body() {
   VC_CHECK(CONST, INT, CHAR, STRING, BOOL, RB, END_FILE, END_FILE, END_FILE);
   if(current_token.type != END_FILE)
     DCL_LIST();
+  print_symbol_table();
   VC_MATCH(RB);
   code(PROG_END);
 }
 
 void DCL_LIST() {
   //DCL_LIST -> (CONST_DCL | VAR_DCL) DCL_LIST
-  while(current_token.type == CONST || is_datatype_except_const(current_token)){
+  st_initialize();
+  while(current_token.type == CONST || is_datatype(current_token.type)){
     if(current_token.type == CONST)
       CONST_DCL();
     else
@@ -71,45 +75,58 @@ void CONST_DCL() {
     current_token = get_token();
     CONST_STMT();
     current_token = get_token();
+    VC_CHECK(COMMA, SEMICO, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE);
+    if(current_token.type != COMMA)
+      if(current_token.type != SEMICO) 
+	VC_ERR("Token \',\' expected");
   }
 }
 
 void CONST_STMT() {
   //CONST_STMT -> ID = ID | ID = literal
+  Token x;
   VC_CHECK(ID, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE);
   if(current_token.type == ID) {
+    //push_operand(current_token);
     current_token = get_token();
-    printf("constant ID / ");
     if(current_token.type != ASSIGN)
-      VC_ERR("= expected");
+      VC_ERR("Token \'=\' expected");
     current_token = get_token();
     if(current_token.type == ID)
-      printf("constant ID\n");//create_id_val(current_token);
+      create_id_val(current_token);
     else
       literal(current_token);
-    //printf("insert\n");
-    //insert(data_type_token, current_token);
+    //insert(pop_operand(),);
   }
   else
     VC_ERR("identifier expected");
 }
 
 void VAR_DCL() {
+  //VAR_DCL -> DATA_TYPE ID_LIST
   TokenType data_type = current_token.type;
-  current_token = get_token();
-  if(current_token.type != ID)
-    VC_ERR("identifier expected");
-  current_token = get_token();
-  VC_CHECK(COMMA, SEMICO, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE);
-  if(current_token.type != COMMA)
-    if(current_token.type != SEMICO) 
-      VC_ERR(", expected");
-  while(current_token.type == COMMA) {
+  if(is_datatype(data_type)) {
     current_token = get_token();
-    if(current_token.type != ID)
+    if(current_token.type == ID)
+      insert_var_symbol_table(data_type, current_token.string);
+    else
       VC_ERR("identifier expected");
     current_token = get_token();
+    VC_CHECK(COMMA, SEMICO, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE);
+    if(current_token.type != COMMA)
+      if(current_token.type != SEMICO) 
+	VC_ERR(", expected");
+    while(current_token.type == COMMA) {
+      current_token = get_token();
+      if(current_token.type == ID)
+	insert_var_symbol_table(data_type, current_token.string);
+      else
+	VC_ERR("identifier expected");
+      current_token = get_token();
+    }
   }
+  else 
+    VC_ERR("data type declaration expected");
 }
 
 void literal(Token token) {

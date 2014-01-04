@@ -8,8 +8,8 @@ int calculate_string_length(char *string) {
   return length;
 }
 
-int is_datatype_except_const(Token token) {
-  if(token.type == INT || token.type == CHAR || token.type == STRING || token.type == BOOL)
+int is_datatype(TokenType data_type) {
+  if(data_type == INT || data_type == CHAR || data_type == STRING || data_type == BOOL)
     return 1;
   else
     return 0;

@@ -3,7 +3,6 @@
 #include "./include/tran.h"
 #include "./include/util.h"
 #include "./include/act-rou.h"
-#include "./include/sym-tab.h"
 #include "./include/err-han.h"
 #include "./include/dbg-aid.h"
 #include "./include/cod-gen.h"
