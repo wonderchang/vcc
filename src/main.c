@@ -33,18 +33,9 @@ char lst_name[FILE_NAME_LEN];
 
 int main(int argc, char *argv[]) {
 
-  /* Data initialization */
-  src_name = argv[1];
-  // - Set the output file name
-  for(int i = 0; src_name[i] != '\0'; i++) {
-    obj_name[i] = src_name[i];
-    err_name[i] = src_name[i];
-    lst_name[i] = src_name[i];
-  }
-
   /* Start to process */
+  process_cmd_argu(argc, argv);
   vcc_prologue();
-  process_cmd_argu();
   start_up_process();
   translate();
   clean_up_process();
@@ -57,55 +48,62 @@ int main(int argc, char *argv[]) {
 //Display process start-up message
 void vcc_prologue() {
   printf("\nVenilla-C Compiler version 1.0  Implemented by Wonder Chang.\n");
-  printf("\nCompile the input file: %s\n", src_name);
+  printf("\nCompile the input file: %s\n\n", src_name);
 }
 
 //Process the command line arguments
-void process_cmd_argu() {
-  int filename_length = calculate_string_length(src_name);
-  if(src_name != NULL) { 
-    if(filename_length <= FILE_NAME_LEN - 4) {
-      src_f = fopen(src_name, "r");
-      strcat(obj_name, ".asm");
-      strcat(err_name, ".err");
-      strcat(lst_name, ".lst");
-      obj_f = fopen(obj_name, "w");
-      err_f = fopen(err_name, "w");
-      lst_f = fopen(lst_name, "w");
-    }
-    else {
-      printf("Error: The compile filename is too long. Only %d characters.\n\n", FILE_NAME_LEN);
+void process_cmd_argu(int argc, char *argv[]) {
+  int filename_length;
+  if(argc == 1) {
+    printf("Error: Require the input file in the argument command line\n");
+    remove_output_file();
+    exit(1);
+  }
+  else {
+    src_name = argv[1];
+    filename_length = calculate_string_length(src_name);
+    if(filename_length > FILE_NAME_LEN - 4) {
+      printf("Error: The compile filename is too long. Only %d characters.\n", FILE_NAME_LEN);
       remove_output_file();
       exit(1);
     }
   }
-  else {
-    printf("Error: Require the input file in the argument command line\n\n");
-    remove_output_file();
-    exit(1);
-  }
 }
 
-//Initialize global data 
-//Create symbol table 
-//Initialize symbol table (e.g. reserved words) 
-//open required files
 void start_up_process() {
+  //Initialize symbol table
+  st_initialize();
+  //open required files
+  strcat(obj_name, src_name);
+  strcat(err_name, src_name);
+  strcat(lst_name, src_name);
+  src_f = fopen(src_name, "r");
+  strcat(obj_name, ".asm");
+  strcat(err_name, ".err");
+  strcat(lst_name, ".lst");
+  obj_f = fopen(obj_name, "w");
+  err_f = fopen(err_name, "w");
+  lst_f = fopen(lst_name, "w");
+  //Initialize global data 
 }
 
 //produce reference information
 //release symbol table
-//close files
 //other
 void clean_up_process() {
+  //close files
   fclose(src_f);
   fclose(obj_f);
   fclose(err_f);
+  if(err_count) 
+    remove_output_file();
 }
 
 //Display process terminating message
 //record data/time
 //dislay statistics
 void vcc_epilogue() {
+  if(err_count)
+    printf("\n%d errors in your program.\n", err_count);
 }
 

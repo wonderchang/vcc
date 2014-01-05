@@ -1,0 +1,3 @@
+test.vc:5:15, Error: The varaible 'true' have not been declaraed before.
+test.vc:5:28, Error: The varaible 'b88' have not been declaraed before.
+test.vc:9:13, Error: The varaible 'b99' have not been declaraed before.

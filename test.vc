@@ -1,4 +1,10 @@
 main() {
-const a = 3, b = 'e', c = "weoef";
-const d = a;
+  const	abc1= 123, 	abc2 = 34, 	def1= abc1;
+  const	c123 = 'A',	c34  = 'B';
+  const s123 = "String 123!";
+  const b88 = true,	b99  = b88;
+  int   x1, y2, z3;
+  char  a4, b5;
+  string  s6;
+  const B77=b99;
 }

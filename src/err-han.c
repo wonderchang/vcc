@@ -6,8 +6,11 @@
 char *token_type_string;
 char err_msg[ERR_MSG_LEN];
 
+int err_count = 0;;
+
 //Error Report, print the error message to the screen and the report file
 void VC_ERR(char *err_message) {
+  err_count++;
   if(err_message != NULL) {
     printf("%s:%d:%d, Error: %s\n", src_name, token_line_no, token_line_pos, err_message);
     fprintf(err_f, "%s:%d:%d, Error: %s\n", src_name, token_line_no, token_line_pos, err_message);
@@ -55,7 +58,7 @@ void VC_CHECK(TokenType op, TokenType op1, TokenType op2, TokenType op3, TokenTy
 
 void remove_output_file() {
   remove(obj_name);
-  remove(err_name);
+  //remove(err_name);
   remove(lst_name);
 }
 

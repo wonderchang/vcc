@@ -45,14 +45,13 @@ void pro_body() {
   VC_CHECK(CONST, INT, CHAR, STRING, BOOL, RB, END_FILE, END_FILE, END_FILE);
   if(current_token.type != END_FILE)
     DCL_LIST();
-  print_symbol_table();
+  //print_symbol_table();
   VC_MATCH(RB);
   code(PROG_END);
 }
 
 void DCL_LIST() {
   //DCL_LIST -> (CONST_DCL | VAR_DCL) DCL_LIST
-  st_initialize();
   while(current_token.type == CONST || is_datatype(current_token.type)){
     if(current_token.type == CONST)
       CONST_DCL();
@@ -115,7 +114,7 @@ void VAR_DCL() {
     switch(data_type) {
       case INT: value = "0"; allocation = 4; break;
       case CHAR: value = " "; allocation = 1; break;
-      case STRING: value = ""; allocation = 4; break;
+      case STRING: value = "_s1"; allocation = 4; break;
       case BOOL: value = "0"; allocation = 1; break;
       default:
 	printf("Program Error. Fucking bug in VAR_DCL.\n");

@@ -17,9 +17,8 @@ typedef SymbolNode *SymbolNodePtr;
 static int hash(char *key);
 void st_initialize();
 void st_insert(Token token, TokenType data_type, char *value, int mode, int allocation);
-void st_insert_internal(char *internal_name, TokenType data_type, char *value);
 SymbolNodePtr st_lookup(char *key);
-SymbolNodePtr set_symbol();
+SymbolNodePtr create_symbol(char *name, TokenType data_type, char *value, int mode, int allocation);
 
 void id_list_initialize();
 void insert_id_list();
