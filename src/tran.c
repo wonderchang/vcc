@@ -84,19 +84,22 @@ void CONST_DCL() {
 
 void CONST_STMT() {
   //CONST_STMT -> ID = ID | ID = literal
-  Token x;
   VC_CHECK(ID, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE, END_FILE);
   if(current_token.type == ID) {
-    //push_operand(current_token);
+    push_operand(current_token);
     current_token = get_token();
     if(current_token.type != ASSIGN)
       VC_ERR("Token \'=\' expected");
     current_token = get_token();
-    if(current_token.type == ID)
-      create_id_val(current_token);
-    else
-      literal(current_token);
-    //insert(pop_operand(),);
+    switch(current_token.type) {
+      case ID: create_id_val(current_token); break;
+      case NUMBER: create_number(current_token); break;
+      case STR_CONST: create_string(current_token); break;
+      case CHAR_CONST: create_char(current_token); break;
+      case TRUE: create_bool(current_token); break;
+      case FALSE: create_bool(current_token); break;
+      default: VC_ERR("constant value expected"); break;
+    }
   }
   else
     VC_ERR("identifier expected");
@@ -105,10 +108,22 @@ void CONST_STMT() {
 void VAR_DCL() {
   //VAR_DCL -> DATA_TYPE ID_LIST
   TokenType data_type = current_token.type;
+  int mode = 1;
+  char *value;
+  int allocation;
   if(is_datatype(data_type)) {
+    switch(data_type) {
+      case INT: value = "0"; allocation = 4; break;
+      case CHAR: value = " "; allocation = 1; break;
+      case STRING: value = ""; allocation = 4; break;
+      case BOOL: value = "0"; allocation = 1; break;
+      default:
+	printf("Program Error. Fucking bug in VAR_DCL.\n");
+	break;
+    }
     current_token = get_token();
     if(current_token.type == ID)
-      insert_var_symbol_table(data_type, current_token.string);
+      st_insert(current_token, data_type, value, mode, allocation);
     else
       VC_ERR("identifier expected");
     current_token = get_token();
@@ -119,7 +134,7 @@ void VAR_DCL() {
     while(current_token.type == COMMA) {
       current_token = get_token();
       if(current_token.type == ID)
-	insert_var_symbol_table(data_type, current_token.string);
+        st_insert(current_token, data_type, value, mode, allocation);
       else
 	VC_ERR("identifier expected");
       current_token = get_token();
@@ -128,18 +143,4 @@ void VAR_DCL() {
   else 
     VC_ERR("data type declaration expected");
 }
-
-void literal(Token token) {
-  switch(token.type) {
-    case NUMBER: printf("literal number\n"); /*create_number(token.string)*/ break;
-    case STR_CONST: printf("literal string\n"); /*create_string(token.string)*/ break;
-    case CHAR_CONST: printf("literal char\n"); /*create_char(token.string)*/ break;
-    case TRUE: printf("literal bool ture\n");/* create_bool(token.string)*/ break;
-    case FALSE: printf("literal bool false\n");/* create_bool(token.string)*/ break;
-    default: VC_ERR("constant value expected"); break;
-  }
-}
-
-
-
 

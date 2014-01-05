@@ -1,4 +1,4 @@
 main() {
-  int x1, y2, x1, a4;
-  string x3;
+const a = 3, b = 'e', c = "weoef";
+const d = a;
 }

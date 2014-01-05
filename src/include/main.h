@@ -6,6 +6,8 @@
 //The Number of the reserved words
 #define MAX_RW_NUM 14
 #define FILE_NAME_LEN 32
+//The max length of the token string
+#define MAX_TOKEN_LEN 1024
 
 //The type of token
 typedef enum {
@@ -26,7 +28,7 @@ typedef enum {
 
 //The token structure that contains some info
 typedef struct {
-  char *string;
+  char string[MAX_TOKEN_LEN];
   TokenType type;
 } Token;
 

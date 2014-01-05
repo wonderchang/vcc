@@ -1,16 +1,12 @@
 #define HASH_TABLE_SIZE 3
-#define ID_LEN 64
 
 //Structure of symbol data
 typedef struct {
-  char name[ID_LEN];
+  char name[MAX_TOKEN_LEN];
   TokenType data_type;
   int mode;
-  char *value;
-  int allocation;
-} Symbol;
-
-struct symbol_node{
+  char value[MAX_TOKEN_LEN];
+  int allocation; } Symbol; struct symbol_node{
   Symbol symbol;
   struct symbol_node *nextPtr;
 };
@@ -18,19 +14,17 @@ struct symbol_node{
 typedef struct symbol_node SymbolNode;
 typedef SymbolNode *SymbolNodePtr;
 
-SymbolNodePtr id_list_head;
-SymbolNodePtr id_list_tail;
-
 static int hash(char *key);
 void st_initialize();
-int st_lookup(char *key);
+void st_insert(Token token, TokenType data_type, char *value, int mode, int allocation);
+void st_insert_internal(char *internal_name, TokenType data_type, char *value);
+SymbolNodePtr st_lookup(char *key);
+SymbolNodePtr set_symbol();
 
 void id_list_initialize();
-void insert_var_symbol_table(TokenType data_type, char *id_name);
 void insert_id_list();
 void print_id_list();
 void print_symbol_info();
-void insert_symbol_table();
 void print_symbol_table();
 
 void create_id_val(Token token);
@@ -39,20 +33,16 @@ void create_char(Token token);
 void create_string(Token token);
 void create_bool(Token token);
 
-/*
+struct token_node {
+  Token token;
+  struct token_node *nextPtr;
+};
 
-struct node {
-  int data;
-  struct node nextPtr;
-}
+typedef struct token_node TokenNode;
+typedef TokenNode *TokenNodePtr;
 
-typedef struct node Node;
-typedef Node NodePtr;
+void push_operand(Token token);
+Token pop_operand();
+void print_stack();
 
-
-void push(NodePtr *top, int data);
-NodePtr pop(NodePtr *top);
-void print_stack(NodePtr currentPtr);
-
-*/
 

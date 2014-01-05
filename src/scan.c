@@ -6,7 +6,7 @@
 //The buffer which store the reading line
 char line_buffer[MAX_BUFLEN];
 //The variable that save an character each time for get next char, to obtain the string of token
-char token_string[MAX_TOKENLEN + 1];
+char token_string[MAX_TOKEN_LEN + 1];
 //The flag that record it is end of file or not
 int EOF_flag = 0;
 //The current character position
@@ -239,15 +239,15 @@ Token get_token() {
 	token.type = reserved_lookup(token_string);
     }
     else {
-      if(state != START && (save) && (token_string_index <= MAX_TOKENLEN)) {
+      if(state != START && (save) && (token_string_index <= MAX_TOKEN_LEN)) {
 	token_string[token_string_index++] = (char) character;
       }
     }
   }
   if(token.type == END_FILE)
-    token.string = "EOF";
+    strcpy(token.string, "EOF");
   else 
-    token.string = token_string;
+    strcpy(token.string, token_string);
   return token;
 }
 
