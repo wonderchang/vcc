@@ -6,6 +6,7 @@
 ###Argument Process Error
 1. No input file argument
 2. The filename is too long, The default length is 28 characters.
+    Error: Require the input file inth e argument command line.
 
 
 
