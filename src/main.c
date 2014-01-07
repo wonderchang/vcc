@@ -104,6 +104,6 @@ void clean_up_process() {
 //dislay statistics
 void vcc_epilogue() {
   if(err_count)
-    printf("\n%d errors in your program.\n", err_count);
+    printf("\n%d errors generated.\n", err_count);
 }
 

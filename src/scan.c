@@ -84,14 +84,13 @@ Token get_token() {
 
   Token token;
   StateType state = START;
-  token_line_no = line_no;
   int token_string_index = 0; 
   int character;
   int save;
 
   while(state != DONE) {
     character = get_next_char();
-    if(state == START) token_line_pos = char_pos + 1;
+    if(state == START) { token_line_pos = char_pos + 1; token_line_no = line_no; }
     save = 1;
     switch(state) {
       case START:

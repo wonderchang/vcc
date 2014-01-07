@@ -135,9 +135,9 @@ void create_id_val(Token token) {
   }
   else {
     clean_err_msg();
-    strcat(err_msg, "The varaible \'");
+    strcat(err_msg, "Use of undeclared identifier \'");
     strcat(err_msg, token.string);
-    strcat(err_msg, "\' have not been declaraed before.");
+    strcat(err_msg, "\'.");
     VC_ERR(err_msg);
   }
 }
