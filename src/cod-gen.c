@@ -1,6 +1,7 @@
 #include "./include/main.h"
 #include "./include/err-han.h"
 #include "./include/cod-gen.h"
+#include "./include/act-rou.h"
 
 void code(ProgramState program_state) {
   switch(program_state) {
@@ -45,9 +46,37 @@ void emit_comments(char *comment) {
 }
 
 void emit_data_segment() {
+  int i;
+  SymbolNodePtr current_symbol;
   fprintf(obj_f, "section .data\n");
+  for(i = 0; i < HASH_TABLE_SIZE; i++) {
+    if(symbol_table[i] != NULL) {
+      current_symbol = symbol_table[i];
+      while(current_symbol != NULL) {
+	emit_data_object(current_symbol);
+	current_symbol = current_symbol->nextPtr;
+      }
+    }
+  }
+  
 }
 
-void emit_data_object() {
+void emit_data_object(SymbolNodePtr symbol) {
+  fprintf(obj_f, "\t%s", symbol->symbol.name);
+  switch(symbol->symbol.allocation) {
+    case 1: fprintf(obj_f, "\t%s", "db"); break;
+    case 2: fprintf(obj_f, "\t%s", "dw"); break;
+    case 4: fprintf(obj_f, "\t%s", "dd"); break;
+    default: printf("Program Error: Fucking bug error in emit_data_object."); break;
+  }
+  if(symbol->symbol.data_type == CHAR)
+    fprintf(obj_f, "\t\'%s\'\n", symbol->symbol.value);
+  else if(symbol->symbol.data_type == STRING) 
+    if(symbol->symbol.value[0] == '_' && symbol->symbol.value[1] == 's')
+      fprintf(obj_f, "\t%s\n", symbol->symbol.value);
+    else 
+      fprintf(obj_f, "\t\"%s\"\n", symbol->symbol.value);
+  else 
+    fprintf(obj_f, "\t%s\n", symbol->symbol.value);
 }
 

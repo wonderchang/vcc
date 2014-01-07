@@ -14,6 +14,8 @@ typedef struct {
 typedef struct symbol_node SymbolNode;
 typedef SymbolNode *SymbolNodePtr;
 
+extern SymbolNodePtr symbol_table[HASH_TABLE_SIZE];
+
 static int hash(char *key);
 void st_initialize();
 void st_insert(Token token, TokenType data_type, char *value, int mode, int allocation);
