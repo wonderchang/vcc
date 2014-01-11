@@ -3,9 +3,13 @@
 #include "./include/tran.h"
 #include "./include/util.h"
 #include "./include/err-han.h"
+#include "./include/sym-tab.h"
 #include "./include/cod-gen.h"
 #include "./include/act-rou.h"
 
+Token operator_tmp;
+Token operand1_tmp;
+Token operand2_tmp;
 
 int translate() {
   current_token = get_token();
@@ -20,7 +24,6 @@ int translate() {
   }
   return 0;
 }
-
 
 void program() {
   while(current_token.type == COMMENT) 
@@ -41,7 +44,7 @@ void pro_hdr() {
 
 void pro_body() {
   VC_MATCH(LB);
-  code(PROG_HDR);
+  emit_prologue();
   VC_CHECK(CONST, INT, CHAR, STRING, BOOL, RB, END_FILE, END_FILE, END_FILE);
   if(current_token.type != END_FILE)
     DCL_LIST();
@@ -49,7 +52,7 @@ void pro_body() {
   if(current_token.type != RB)
     STMT_LIST();
   VC_MATCH(RB);
-  code(PROG_END);
+  emit_epilogue();
 }
 
 void DCL_LIST() {
@@ -165,14 +168,124 @@ void STATEMENT(Token token) {
   }
 }
 
+//ASSIGNMENT_STMT -> ID = SIMPLE_EXPR
 void ASSIGN_STMT(Token token) {
+  printf("ASSIGN_STMT\n");
   if(token.type != ID)
     printf("ASSIGN_STMT's should be starting in ID token\n");
   else {
+    push_operand(token);
+    current_token = get_token();
+    if(current_token.type != ASSIGN) {
+      VC_ERR("Token \'=\' expected.");
+      current_token = get_token();
+    }
+    else {
+      push_operand(current_token);
+      current_token = get_token();
+      SIMPLE_EXPR(current_token);
+      code(pop_operand(), pop_operand(), pop_operand());
+    }
+    //To skip the token until encounter the semicolon
     while(current_token.type != SEMICO) 
       current_token = get_token();
   }
 }
+
+//SIMPLE_EXPR -> ADDITIVE_EXPR PART_EXPR
+void SIMPLE_EXPR(Token token) { 
+  //printf("SIMPLE_EXPR, current_token = %s\n", current_token.string);
+  ADDITIVE_EXPR(current_token);
+  PART_EXPR(current_token);
+}
+
+//ADDITIVE_EXPR -> TERM PART_ADDITIVE
+void ADDITIVE_EXPR(Token token) { 
+  //printf("ADDITIVE_EXPR, current_token = %s\n", current_token.string);
+  TERM(current_token); 
+  PART_ADDITIVE(current_token);
+}
+
+//PART_EXPR -> REL_OP ADDITIVE_EXPR | null
+void PART_EXPR(Token token) {
+  //printf("PART_EXPR, current_token = %s\n", current_token.string);
+  if(token.type == GT || token.type == GTEQ || token.type == LT || token.type == LTEQ || token.type == EQ || token.type == NEQ) {
+    push_operand(current_token);
+    current_token = get_token();
+    ADDITIVE_EXPR(current_token);
+  }
+}
+
+//TERM -> FACTOR PART_TERM
+void TERM(Token token) {
+  //printf("TERM, current_token = %s\n", current_token.string);
+  FACTOR(current_token);
+  PART_TERM(current_token);
+}
+
+//PART_ADDITIVE -> ADD_OP ADDITIVE_EXPR
+void PART_ADDITIVE(Token token) {
+  Token new_token;
+  //printf("PART_ADDITIVE, current_token = %s\n", current_token.string);
+  if(token.type == PLUS || token.type == MINUS) {
+    push_operand(current_token);
+    current_token = get_token();
+    ADDITIVE_EXPR(current_token);
+
+    sprintf(new_token.string, "_i%d", ++int_internal_num);
+    new_token.type = INT;
+
+    st_insert(new_token, INT, "0", 1, 4);
+
+    code(pop_operand(), pop_operand(), pop_operand());
+    push_operand(new_token);
+  }
+  else if(token.type == RP || token.type == SEMICO) {
+  }
+  else
+    VC_ERR("Token operator expected.");
+}
+
+//FACTOR -> (SIMPLE_EXPR) | ID | LITERAL
+void FACTOR(Token token) {
+  //printf("FACTOR, current_token = %s\n", current_token.string);
+  if(token.type == LP) {
+    current_token = get_token();
+    printf("------Sub Simple Expression------\n");
+    SIMPLE_EXPR(current_token);
+    printf("---------------------------------\n");
+    if(current_token.type != RP) 
+      VC_ERR("Token \')\' expected.");
+    current_token = get_token();
+  }
+  else {
+    if(token.type == ID || token.type == NUMBER)
+      push_operand(current_token);
+    else 
+      VC_ERR("Token identifier or number expected.");
+    current_token = get_token();
+  }
+}
+
+//PART_TERM -> MUL_OP TERM | null
+void PART_TERM(Token token) {
+  Token new_token;
+  //printf("PART_TERM, current_token = %s\n", current_token.string);
+  if(token.type == TIMES || token.type == DIVIDE || token.type == MODE) {
+    push_operand(current_token);
+    current_token = get_token();
+    TERM(current_token);
+
+    sprintf(new_token.string, "_i%d", ++int_internal_num);
+    new_token.type = INT;
+
+    st_insert(new_token, INT, "0", 1, 4);
+
+    code(pop_operand(), pop_operand(), pop_operand());
+    push_operand(new_token);
+  }
+}
+
 
 void READ_STMT(Token token) {
   if(token.type != READ)

@@ -1,37 +1,28 @@
 #include "./include/main.h"
 #include "./include/err-han.h"
 #include "./include/cod-gen.h"
+#include "./include/sym-tab.h"
 #include "./include/act-rou.h"
 
-void code(ProgramState program_state) {
-  switch(program_state) {
-    case PROG_HDR: emit_prologue(); break;
-    case PROG_END: emit_epilogue(); break;
-    case ASSIGN_OP: emit_assign(); break;
-    case PLUS_OP: emit_plus(); break;
-    case MINUS_OP: emit_minus(); break;
-    case TIMES_OP: emit_times(); break;
-    case DIVIDE_OP: emit_divide(); break;
-    case MODE_OP: emit_mode(); break;
-    case GT_OP: emit_gt(); break;
-    case GTE_OP: emit_gte(); break;
-    case LT_OP: emit_lt(); break;
-    case LTE_OP: emit_lte(); break;
-    case EQ_OP: emit_eq(); break;
-    case NEQ_OP: emit_neq(); break;
-    case READ_OP: emit_read(); break;
-    case PRINT_OP: emit_print(); break;
-    case PRINTLN_OP: emit_println(); break;
+void code(Token operand2, Token op, Token operand1) {
+  switch(op.type) {
+    case ASSIGN: emit_assign(op, operand1, operand2); break;
+    case PLUS: emit_plus(op, operand1, operand2); break;
+    case MINUS: emit_minus(op, operand1, operand2); break;
+    case TIMES: emit_times(op, operand1, operand2); break;
+    case DIVIDE: emit_divide(op, operand1, operand2); break;
+    case MODE: emit_mode(op, operand1, operand2); break;
+    case GT: emit_gt(op, operand1, operand2); break;
+    case GTEQ: emit_gte(op, operand1, operand2); break;
+    case LT: emit_lt(op, operand1, operand2); break;
+    case LTEQ: emit_lte(op, operand1, operand2); break;
+    case EQ: emit_eq(op, operand1, operand2); break;
+    case NEQ: emit_neq(op, operand1, operand2); break;
+    case READ: emit_read(); break;
+    case PRINT: emit_print(); break;
+    case PRINTLN: emit_println(); break;
     default: VC_ERR("Fucking program error. Unexpected condition"); break;
   }
-}
-
-void emit(char *opcode, char *op1, char *op2) {
-  fprintf(obj_f, "\t%s", opcode);
-  fprintf(obj_f, "\t%s", op1);
-  if(op2 != NULL) 
-    fprintf(obj_f, ", %s", op2);
-  fprintf(obj_f, "\n");
 }
 
 void emit_label(int L) {
@@ -96,20 +87,32 @@ void emit_data_object(SymbolNodePtr symbol) {
 }
 
 
-void emit_assign(){}
-void emit_plus(){}
-void emit_minus(){}
-void emit_times(){}
-void emit_divide(){}
-void emit_mode(){}
-void emit_gt(){}
-void emit_gte(){}
-void emit_lt(){}
-void emit_lte(){}
-void emit_eq(){}
-void emit_neq(){}
-void emit_read(){}
-void emit_print(){}
-void emit_println(){}
+void emit_assign(Token op, Token op1, Token op2){ 
+  printf("emit_assign, %s %s %s\n", op1.string, op.string, op2.string); 
+}
+void emit_plus(Token op, Token op1, Token op2){ 
+  printf("emit_plus, %s %s %s\n", op1.string, op.string, op2.string); 
+}
+void emit_minus(Token op, Token op1, Token op2){ 
+  printf("emit_minus, %s %s %s\n", op1.string, op.string, op2.string); 
+}
+void emit_times(Token op, Token op1, Token op2){ 
+  printf("emit_times, %s %s %s\n", op1.string, op.string, op2.string); 
+}
+void emit_divide(Token op, Token op1, Token op2){ 
+  printf("emit_divide, %s %s %s\n", op1.string, op.string, op2.string); 
+}
+void emit_mode(Token op, Token op1, Token op2){ 
+  printf("emit_mode, %s %s %s\n", op1.string, op.string, op2.string); 
+}
+void emit_gt(Token op, Token op1, Token op2){ printf("emit_gt\n"); }
+void emit_gte(Token op, Token op1, Token op2){ printf("emit_gte\n"); }
+void emit_lt(Token op, Token op1, Token op2){ printf("emit_lt\n"); }
+void emit_lte(Token op, Token op1, Token op2){ printf("emit_lte\n"); }
+void emit_eq(Token op, Token op1, Token op2){ printf("emit_eq\n"); }
+void emit_neq(Token op, Token op1, Token op2){ printf("emit_neq\n"); }
+void emit_read(){ printf("emit_read\n"); }
+void emit_print(){ printf("emit_print\n"); }
+void emit_println(){ printf("emit_println\n"); }
 
 

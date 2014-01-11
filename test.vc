@@ -1,7 +1,5 @@
 main() {
-const a = 12;
-int b;
-
-b = a + 3;
-
+const a = 1, b = 2, c = 3, d = 4, e = 5, y = 10;
+int x;
+x = a + (b - c) * y - (d / e);
 }

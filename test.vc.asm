@@ -9,6 +9,16 @@ _start:
 
 ; Data segment
 section .data
+	c	dd	3
+	x	dd	0
+	_i1	dd	0
+	_i4	dd	0
 	_s1	db	""
-	a	dd	12
-	b	dd	0
+	a	dd	1
+	d	dd	4
+	y	dd	10
+	_i2	dd	0
+	_i5	dd	0
+	b	dd	2
+	e	dd	5
+	_i3	dd	0

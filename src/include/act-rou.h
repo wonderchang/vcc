@@ -1,49 +1,30 @@
-#define HASH_TABLE_SIZE 3
 
-//Structure of symbol data
-typedef struct {
-  char name[MAX_TOKEN_LEN];
-  TokenType data_type;
-  int mode;
-  char value[MAX_TOKEN_LEN];
-  int allocation; } Symbol; struct symbol_node{
-  Symbol symbol;
-  struct symbol_node *nextPtr;
-};
+//Record the internal number name
+extern int int_internal_num;
+extern int char_internal_num;
+extern int string_internal_num;
+extern int bool_internal_num;
 
-typedef struct symbol_node SymbolNode;
-typedef SymbolNode *SymbolNodePtr;
-
-extern SymbolNodePtr symbol_table[HASH_TABLE_SIZE];
-
-static int hash(char *key);
-void st_initialize();
-void st_insert(Token token, TokenType data_type, char *value, int mode, int allocation);
-SymbolNodePtr st_lookup(char *key);
-SymbolNodePtr create_symbol(char *name, TokenType data_type, char *value, int mode, int allocation);
-
-void id_list_initialize();
-void insert_id_list();
-void print_id_list();
-void print_symbol_info();
-void print_symbol_table();
-
+//Create the varaible declaration
 void create_id_val(Token token);
 void create_number(Token token);
 void create_char(Token token);
 void create_string(Token token);
 void create_bool(Token token);
 
+//Token stack data structure
 struct token_node {
   Token token;
   struct token_node *nextPtr;
 };
-
 typedef struct token_node TokenNode;
 typedef TokenNode *TokenNodePtr;
 
+//Push token as operand into stack
 void push_operand(Token token);
+//Pop and return token as operand out token
 Token pop_operand();
+//Print the stack element
 void print_stack();
 
 

@@ -1,4 +1,4 @@
-void code(ProgramState program_state);
+void code(Token operand1, Token op, Token operand2);
 void emit(char *opcode, char *op1, char *op2);
 void emit_label(int L);
 void emit_prologue();

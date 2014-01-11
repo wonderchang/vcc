@@ -15,3 +15,11 @@ void PRINT_STMT(Token token);
 void PRINTLN_STMT(Token token);
 void IF_STMT(Token token);
 void WHILE_STMT(Token token);
+
+void SIMPLE_EXPR(Token token);
+void ADDITIVE_EXPR(Token token);
+void PART_EXPR(Token token);
+void TERM(Token token);
+void PART_ADDITIVE(Token token);
+void FACTOR(Token token);
+void PART_TERM(Token token);
