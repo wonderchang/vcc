@@ -49,7 +49,10 @@ extern int token_line_pos;
 extern Token current_token;
 
 typedef enum {
-  PROG_HDR, PROG_END
+  PROG_HDR, PROG_END,
+  ASSIGN_OP, PLUS_OP, MINUS_OP, TIMES_OP, DIVIDE_OP, MODE_OP,
+  GT_OP, GTE_OP, LT_OP, LTE_OP, EQ_OP, NEQ_OP,
+  READ_OP, PRINT_OP, PRINTLN_OP
 } ProgramState;
 
 

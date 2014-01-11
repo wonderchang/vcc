@@ -45,7 +45,9 @@ void pro_body() {
   VC_CHECK(CONST, INT, CHAR, STRING, BOOL, RB, END_FILE, END_FILE, END_FILE);
   if(current_token.type != END_FILE)
     DCL_LIST();
-  //print_symbol_table();
+  printf("DCL_LIST is over\n");
+  if(current_token.type != RB)
+    STMT_LIST();
   VC_MATCH(RB);
   code(PROG_END);
 }
@@ -60,7 +62,7 @@ void DCL_LIST() {
     if(current_token.type != SEMICO)
       VC_ERR("; missing");
     current_token = get_token();
-    VC_CHECK(CONST, INT, CHAR, STRING, BOOL, RB, END_FILE, END_FILE, END_FILE);
+    //VC_CHECK(CONST, INT, CHAR, STRING, BOOL, RB, END_FILE, END_FILE, END_FILE);
   }
 }
 
@@ -142,4 +144,79 @@ void VAR_DCL() {
   else 
     VC_ERR("data type declaration expected");
 }
+
+void STMT_LIST() {
+  while(current_token.type != RB) {
+    STATEMENT(current_token);
+    if(current_token.type == SEMICO)
+      current_token = get_token();
+  }
+}
+
+void STATEMENT(Token token) {
+  switch(token.type) {
+    case ID: ASSIGN_STMT(token); break;
+    case READ: READ_STMT(token); break;
+    case PRINT: PRINT_STMT(token); break;
+    case PRINTLN: PRINT_STMT(token); break;
+    case IF: IF_STMT(token); break;
+    case WHILE: WHILE_STMT(token); break;
+    default: break;
+  }
+}
+
+void ASSIGN_STMT(Token token) {
+  if(token.type != ID)
+    printf("ASSIGN_STMT's should be starting in ID token\n");
+  else {
+    while(current_token.type != SEMICO) 
+      current_token = get_token();
+  }
+}
+
+void READ_STMT(Token token) {
+  if(token.type != READ)
+    printf("READ_STMT's should be starting in READ token\n");
+  else {
+    while(current_token.type != SEMICO) 
+      current_token = get_token();
+  }
+}
+
+void PRINT_STMT(Token token) {
+  if(token.type != PRINT)
+    printf("PRINT_STMT's should be starting in PRINT token\n");
+  else {
+    while(current_token.type != SEMICO) 
+      current_token = get_token();
+  }
+}
+
+void PRINTLN_STMT(Token token) {
+  if(token.type != PRINTLN)
+    printf("PRINTLN_STMT's should be starting in PRINTLN token\n");
+  else {
+    while(current_token.type != SEMICO) 
+      current_token = get_token();
+  }
+}
+
+void IF_STMT(Token token) {
+  if(token.type != IF)
+    printf("IF_STMT's should be starting in IF token\n");
+  else {
+    while(current_token.type != SEMICO) 
+      current_token = get_token();
+  }
+}
+
+void WHILE_STMT(Token token) {
+  if(token.type != WHILE)
+    printf("WHILE_STMT's should be starting in WHILE token\n");
+  else {
+    while(current_token.type != SEMICO) 
+      current_token = get_token();
+  }
+}
+
 

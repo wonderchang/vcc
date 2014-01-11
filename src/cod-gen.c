@@ -7,6 +7,21 @@ void code(ProgramState program_state) {
   switch(program_state) {
     case PROG_HDR: emit_prologue(); break;
     case PROG_END: emit_epilogue(); break;
+    case ASSIGN_OP: emit_assign(); break;
+    case PLUS_OP: emit_plus(); break;
+    case MINUS_OP: emit_minus(); break;
+    case TIMES_OP: emit_times(); break;
+    case DIVIDE_OP: emit_divide(); break;
+    case MODE_OP: emit_mode(); break;
+    case GT_OP: emit_gt(); break;
+    case GTE_OP: emit_gte(); break;
+    case LT_OP: emit_lt(); break;
+    case LTE_OP: emit_lte(); break;
+    case EQ_OP: emit_eq(); break;
+    case NEQ_OP: emit_neq(); break;
+    case READ_OP: emit_read(); break;
+    case PRINT_OP: emit_print(); break;
+    case PRINTLN_OP: emit_println(); break;
     default: VC_ERR("Fucking program error. Unexpected condition"); break;
   }
 }
@@ -79,4 +94,22 @@ void emit_data_object(SymbolNodePtr symbol) {
   else 
     fprintf(obj_f, "\t%s\n", symbol->symbol.value);
 }
+
+
+void emit_assign(){}
+void emit_plus(){}
+void emit_minus(){}
+void emit_times(){}
+void emit_divide(){}
+void emit_mode(){}
+void emit_gt(){}
+void emit_gte(){}
+void emit_lt(){}
+void emit_lte(){}
+void emit_eq(){}
+void emit_neq(){}
+void emit_read(){}
+void emit_print(){}
+void emit_println(){}
+
 

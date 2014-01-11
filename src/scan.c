@@ -81,6 +81,13 @@ static TokenType reserved_lookup (char * s) {
 }
 
 Token get_token() {
+  Token token = scan_token();
+  while(token.type == COMMENT)
+    token = scan_token();
+  return token;
+}
+
+Token scan_token() {
 
   Token token;
   StateType state = START;
