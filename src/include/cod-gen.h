@@ -25,3 +25,4 @@ void emit_println();
 
 
 
+char *var_name_adding_bracket(char *name);

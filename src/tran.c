@@ -225,20 +225,12 @@ void TERM(Token token) {
 
 //PART_ADDITIVE -> ADD_OP ADDITIVE_EXPR
 void PART_ADDITIVE(Token token) {
-  Token new_token;
   //printf("PART_ADDITIVE, current_token = %s\n", current_token.string);
   if(token.type == PLUS || token.type == MINUS) {
     push_operand(current_token);
     current_token = get_token();
     ADDITIVE_EXPR(current_token);
-
-    sprintf(new_token.string, "_i%d", ++int_internal_num);
-    new_token.type = INT;
-
-    st_insert(new_token, INT, "0", 1, 4);
-
     code(pop_operand(), pop_operand(), pop_operand());
-    push_operand(new_token);
   }
   else if(token.type == RP || token.type == SEMICO) {
   }
@@ -275,14 +267,7 @@ void PART_TERM(Token token) {
     push_operand(current_token);
     current_token = get_token();
     TERM(current_token);
-
-    sprintf(new_token.string, "_i%d", ++int_internal_num);
-    new_token.type = INT;
-
-    st_insert(new_token, INT, "0", 1, 4);
-
     code(pop_operand(), pop_operand(), pop_operand());
-    push_operand(new_token);
   }
 }
 

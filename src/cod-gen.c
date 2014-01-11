@@ -4,6 +4,9 @@
 #include "./include/sym-tab.h"
 #include "./include/act-rou.h"
 
+char var_tmp_name[MAX_TOKEN_LEN];
+int tmp_index;
+
 void code(Token operand2, Token op, Token operand1) {
   switch(op.type) {
     case ASSIGN: emit_assign(op, operand1, operand2); break;
@@ -64,7 +67,7 @@ void emit_data_segment() {
       }
     }
   }
-  
+
 }
 
 void emit_data_object(SymbolNodePtr symbol) {
@@ -86,21 +89,106 @@ void emit_data_object(SymbolNodePtr symbol) {
     fprintf(obj_f, "\t%s\n", symbol->symbol.value);
 }
 
+void emit(char *opcode, char *op1, char *op2) {
+  fprintf(obj_f, "\t%s", opcode);
+  fprintf(obj_f, "\t%s", op1);
+  if(op2 != NULL) {
+    fprintf(obj_f, "\t%s", op2);
+  }
+  fprintf(obj_f, "\n");
+}
 
 void emit_assign(Token op, Token op1, Token op2){ 
   printf("emit_assign, %s %s %s\n", op1.string, op.string, op2.string); 
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++)
+    var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, op2.string); strcat(var_tmp_name, "]");
+  emit("mov", "eax", var_tmp_name);
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++)
+    var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, op1.string); strcat(var_tmp_name, "]");
+  emit("mov", var_tmp_name, "eax");
 }
 void emit_plus(Token op, Token op1, Token op2){ 
+  Token new_token;
   printf("emit_plus, %s %s %s\n", op1.string, op.string, op2.string); 
+  sprintf(new_token.string, "_i%d", ++int_internal_num);
+  new_token.type = INT;
+  st_insert(new_token, INT, "0", 1, 4);
+  push_operand(new_token);
+
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, op1.string); strcat(var_tmp_name, "]");
+  emit("mov", "eax", var_tmp_name);
+
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, op2.string); strcat(var_tmp_name, "]");
+  emit("add", "eax", var_tmp_name);
+
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, new_token.string); strcat(var_tmp_name, "]");
+  emit("mov", var_tmp_name, "eax");
 }
 void emit_minus(Token op, Token op1, Token op2){ 
+  Token new_token;
   printf("emit_minus, %s %s %s\n", op1.string, op.string, op2.string); 
+  sprintf(new_token.string, "_i%d", ++int_internal_num);
+  new_token.type = INT;
+  st_insert(new_token, INT, "0", 1, 4);
+  push_operand(new_token);
+
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, op1.string); strcat(var_tmp_name, "]");
+  emit("mov", "eax", var_tmp_name);
+
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, op2.string); strcat(var_tmp_name, "]");
+  emit("sub", "eax", var_tmp_name);
+
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, new_token.string); strcat(var_tmp_name, "]");
+  emit("mov", var_tmp_name, "eax");
 }
 void emit_times(Token op, Token op1, Token op2){ 
+  Token new_token;
   printf("emit_times, %s %s %s\n", op1.string, op.string, op2.string); 
+  sprintf(new_token.string, "_i%d", ++int_internal_num);
+  new_token.type = INT;
+  st_insert(new_token, INT, "0", 1, 4);
+  push_operand(new_token);
+
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, op1.string); strcat(var_tmp_name, "]");
+  emit("mov", "eax", var_tmp_name);
+
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, op2.string); strcat(var_tmp_name, "]");
+  emit("imul", "dword", var_tmp_name);
+
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, new_token.string); strcat(var_tmp_name, "]");
+  emit("mov", var_tmp_name, "eax");
 }
 void emit_divide(Token op, Token op1, Token op2){ 
+  Token new_token;
   printf("emit_divide, %s %s %s\n", op1.string, op.string, op2.string); 
+  sprintf(new_token.string, "_i%d", ++int_internal_num);
+  new_token.type = INT;
+  st_insert(new_token, INT, "0", 1, 4);
+  push_operand(new_token);
+  
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, op1.string); strcat(var_tmp_name, "]");
+  emit("mov", "eax", var_tmp_name);
+  emit("mov", "edx", 0);
+
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, op2.string); strcat(var_tmp_name, "]");
+  emit("idiv", "dword", var_tmp_name);
+
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
+  strcat(var_tmp_name, "["); strcat(var_tmp_name, new_token.string); strcat(var_tmp_name, "]");
+  emit("mov", var_tmp_name, "eax");
 }
 void emit_mode(Token op, Token op1, Token op2){ 
   printf("emit_mode, %s %s %s\n", op1.string, op.string, op2.string); 
