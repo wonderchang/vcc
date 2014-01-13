@@ -51,7 +51,7 @@ void emit_epilogue() {
 }
 
 void emit_comments(char *comment) {
-  fprintf(obj_f, "; %s\n", comment);
+  fprintf(obj_f, "\n; %s\n", comment);
 }
 
 void emit_data_segment() {
@@ -71,7 +71,7 @@ void emit_data_segment() {
 }
 
 void emit_data_object(SymbolNodePtr symbol) {
-  fprintf(obj_f, "\t%s", symbol->symbol.name);
+  fprintf(obj_f, "\t%s:", symbol->symbol.name);
   switch(symbol->symbol.allocation) {
     case 1: fprintf(obj_f, "\t%s", "db"); break;
     case 2: fprintf(obj_f, "\t%s", "dw"); break;
@@ -93,13 +93,14 @@ void emit(char *opcode, char *op1, char *op2) {
   fprintf(obj_f, "\t%s", opcode);
   fprintf(obj_f, "\t%s", op1);
   if(op2 != NULL) {
-    fprintf(obj_f, "\t%s", op2);
+    fprintf(obj_f, ",\t%s", op2);
   }
   fprintf(obj_f, "\n");
 }
 
 void emit_assign(Token op, Token op1, Token op2){ 
   printf("emit_assign, %s %s %s\n", op1.string, op.string, op2.string); 
+  emit_comments("\tAssigment");
   for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++)
     var_tmp_name[tmp_index] = '\0';
   strcat(var_tmp_name, "["); strcat(var_tmp_name, op2.string); strcat(var_tmp_name, "]");
@@ -112,6 +113,8 @@ void emit_assign(Token op, Token op1, Token op2){
 void emit_plus(Token op, Token op1, Token op2){ 
   Token new_token;
   printf("emit_plus, %s %s %s\n", op1.string, op.string, op2.string); 
+  emit_comments("\tPlus");
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
   sprintf(new_token.string, "_i%d", ++int_internal_num);
   new_token.type = INT;
   st_insert(new_token, INT, "0", 1, 4);
@@ -132,6 +135,8 @@ void emit_plus(Token op, Token op1, Token op2){
 void emit_minus(Token op, Token op1, Token op2){ 
   Token new_token;
   printf("emit_minus, %s %s %s\n", op1.string, op.string, op2.string); 
+  emit_comments("\tMinus");
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
   sprintf(new_token.string, "_i%d", ++int_internal_num);
   new_token.type = INT;
   st_insert(new_token, INT, "0", 1, 4);
@@ -152,6 +157,8 @@ void emit_minus(Token op, Token op1, Token op2){
 void emit_times(Token op, Token op1, Token op2){ 
   Token new_token;
   printf("emit_times, %s %s %s\n", op1.string, op.string, op2.string); 
+  emit_comments("\tTimes");
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
   sprintf(new_token.string, "_i%d", ++int_internal_num);
   new_token.type = INT;
   st_insert(new_token, INT, "0", 1, 4);
@@ -172,6 +179,8 @@ void emit_times(Token op, Token op1, Token op2){
 void emit_divide(Token op, Token op1, Token op2){ 
   Token new_token;
   printf("emit_divide, %s %s %s\n", op1.string, op.string, op2.string); 
+  emit_comments("\tDivide");
+  for(tmp_index = 0; tmp_index < MAX_TOKEN_LEN; tmp_index++) var_tmp_name[tmp_index] = '\0';
   sprintf(new_token.string, "_i%d", ++int_internal_num);
   new_token.type = INT;
   st_insert(new_token, INT, "0", 1, 4);
